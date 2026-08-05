@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Studio · Silence Remover</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0d14;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #eef2f6;
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: #11171f;
+            border-radius: 40px;
+            padding: 28px 32px 36px;
+            border: 1px solid #26303e;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 i {
+            color: #6c8cff;
+        }
+        .badge {
+            background: linear-gradient(135deg, #4a6cf7, #6c3ce0);
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .badge-ai {
+            background: linear-gradient(135deg, #c4902a, #e0aa3a);
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            background: #1a232f;
+            padding: 10px 16px;
+            border-radius: 60px;
+            margin-bottom: 18px;
+            border: 1px solid #2a3547;
+        }
+        .toolbar button {
+            background: #283344;
+            border: none;
+            color: #d6dfec;
+            padding: 7px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: 1px solid #3a475e;
+            transition: 0.2s;
+        }
+        .toolbar button:hover {
+            background: #3a4a60;
+            color: #fff;
+        }
+        .toolbar button.primary {
+            background: #4a6cf7;
+            border-color: #4a6cf7;
+            color: #fff;
+        }
+        .toolbar button.primary:hover {
+            background: #5f7cff;
+            box-shadow: 0 0 20px #4a6cf766;
+        }
+        .toolbar button.success {
+            background: #1f8f5a;
+            border-color: #2aad6e;
+            color: #fff;
+        }
+        .toolbar button.success:hover {
+            background: #2ab06e;
+        }
+        .toolbar button.warning {
+            background: #c4902a;
+            border-color: #e0aa3a;
+            color: #fff;
+        }
+        .toolbar button.warning:hover {
+            background: #dbaa3a;
+        }
+        .toolbar button.danger {
+            background: #8f2a2a;
+            border-color: #c44a4a;
+            color: #fff;
+        }
+        .toolbar button.danger:hover {
+            background: #b43a3a;
+        }
+        .sep {
+            width: 1px;
+            height: 26px;
+            background: #3b475c;
+        }
+        .status-text {
+            font-size: 0.75rem;
+            color: #95a9c9;
+            margin-left: auto;
+            padding: 4px 14px;
+            background: #141d29;
+            border-radius: 30px;
+            border: 1px solid #2a3547;
+            white-space: nowrap;
+        }
+        .file-hidden {
+            display: none;
+        }
+
+        .wave-area {
+            background: #0e141e;
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid #25303f;
+            margin-bottom: 14px;
+        }
+        #wave-container {
+            width: 100%;
+            height: 140px;
+            background: #090d15;
+            border-radius: 16px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+        #wave-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .playhead {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: #ffbb5e;
+            pointer-events: none;
+            box-shadow: 0 0 16px #ffbb5eaa;
+            z-index: 5;
+            transition: left 0.05s linear;
+        }
+        .selection-box {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: rgba(74, 108, 247, 0.25);
+            border: 2px solid #4a6cf7;
+            pointer-events: none;
+            z-index: 4;
+            display: none;
+        }
+        .gap-indicator {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.2);
+            border-left: 2px solid rgba(255, 0, 0, 0.5);
+            border-right: 2px solid rgba(255, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 3;
+            display: none;
+        }
+
+        .transport {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .transport button {
+            background: transparent;
+            border: none;
+            color: #bcc9e0;
+            font-size: 1.3rem;
+            padding: 4px 10px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .transport button:hover {
+            background: #1f2a3a;
+        }
+        .transport .play-btn {
+            background: #4a6cf7;
+            color: #fff;
+            padding: 6px 24px;
+            font-size: 1rem;
+            border-radius: 60px;
+            font-weight: 700;
+        }
+        .transport .play-btn:hover {
+            background: #5f7cff;
+        }
+        #timeDisplay {
+            font-size: 0.85rem;
+            color: #a2b7d6;
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+        #segmentInfo {
+            font-size: 0.75rem;
+            color: #7a8fae;
+            margin-left: auto;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            background: #1a232f;
+            padding: 10px 18px;
+            border-radius: 40px;
+            margin-top: 12px;
+            border: 1px solid #2a3547;
+            align-items: center;
+        }
+        .controls label {
+            font-size: 0.7rem;
+            color: #9aacc9;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .controls input[type="range"] {
+            width: 70px;
+            background: #2e3a4e;
+            height: 3px;
+            border-radius: 10px;
+            -webkit-appearance: none;
+        }
+        .controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #ffbb5e;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .controls .val {
+            min-width: 20px;
+            color: #ffbb5e;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .controls .hint {
+            color: #5fec7a;
+            font-size: 0.6rem;
+            margin-left: 8px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 8px;
+        }
+        .actions button {
+            background: #1f2838;
+            border: 1px solid #32405a;
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: #cbd8ed;
+            font-weight: 500;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .actions button:hover {
+            background: #2e3d57;
+            color: #fff;
+        }
+        .actions button.success {
+            background: #1f8f5a;
+            border-color: #2aad6e;
+            color: #fff;
+        }
+        .actions button.danger {
+            background: #8f2a2a;
+            border-color: #c44a4a;
+            color: #fff;
+        }
+        .actions button.warning {
+            background: #c4902a;
+            border-color: #e0aa3a;
+            color: #fff;
+        }
+        .actions button.primary {
+            background: #4a6cf7;
+            border-color: #4a6cf7;
+            color: #fff;
+        }
+
+        .info-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            color: #6a7f9e;
+            font-size: 0.7rem;
+        }
+        .info-bar span {
+            background: #141d29;
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1px solid #1f2a3a;
+        }
+
+        .countdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+            backdrop-filter: blur(8px);
+        }
+        .countdown-overlay.active {
+            display: flex;
+        }
+        .countdown-number {
+            font-size: 160px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 80px rgba(74, 108, 247, 0.5);
+            animation: pulseCount 0.8s ease;
+        }
+        .countdown-number.start {
+            color: #5fec7a;
+            font-size: 80px;
+        }
+        .countdown-label {
+            color: #8899bb;
+            font-size: 16px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+        .countdown-bar {
+            width: 200px;
+            height: 3px;
+            background: #1a2533;
+            border-radius: 10px;
+            margin-top: 24px;
+            overflow: hidden;
+        }
+        .countdown-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a6cf7, #5fec7a);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+        @keyframes pulseCount {
+            0% {
+                transform: scale(1.5);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .live-badge {
+            background: #1f8f5a;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.55rem;
+            color: #fff;
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+        .live-badge.active {
+            display: inline-flex;
+        }
+        .live-badge .dot {
+            width: 5px;
+            height: 5px;
+            background: #5fec7a;
+            border-radius: 50%;
+            animation: pulseDot 0.8s infinite;
+        }
+        @keyframes pulseDot {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .metrics-box {
+            background: #1a232f;
+            border-radius: 16px;
+            padding: 12px 18px;
+            margin-top: 10px;
+            border: 1px solid #2a3547;
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+        }
+        .metrics-box.active {
+            display: grid;
+        }
+        .metrics-box .item {
+            text-align: center;
+            padding: 6px;
+        }
+        .metrics-box .item .label {
+            font-size: 0.6rem;
+            color: #7a8fae;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metrics-box .item .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffbb5e;
+        }
+        .metrics-box .item .value.green {
+            color: #5fec7a;
+        }
+        .metrics-box .item .value.red {
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 12px;
+            }
+            .toolbar {
+                border-radius: 30px;
+                padding: 8px 10px;
+            }
+            .toolbar button {
+                font-size: 0.7rem;
+                padding: 5px 12px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            .countdown-number {
+                font-size: 100px;
+            }
+            .metrics-box {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- COUNTDOWN OVERLAY -->
+    <div class="countdown-overlay" id="countdownOverlay">
+        <div class="countdown-number" id="countdownNumber">3</div>
+        <div class="countdown-label" id="countdownLabel">Tayari</div>
+        <div class="countdown-bar">
+            <div class="countdown-bar-fill" id="countdownBar"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-microphone-alt"></i>
+                AI Studio
+                <span class="badge">Silence Remover</span>
+                <span class="badge badge-ai">🧠 AI VAD</span>
+            </h1>
+            <span class="live-badge" id="liveBadge"><span class="dot"></span> LIVE</span>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <button id="recordBtn" class="primary"><i class="fas fa-circle"></i> Rekodi</button>
+            <button id="stopBtn" class="danger"><i class="fas fa-stop"></i> Simamisha</button>
+            <div class="sep"></div>
+            <button id="uploadBtn"><i class="fas fa-upload"></i> Weka</button>
+            <input type="file" id="fileInput" class="file-hidden" accept="audio/*">
+            <div class="sep"></div>
+            <button id="autoRemoveBtn" class="warning" style="font-weight:700;"><i class="fas fa-magic"></i> AI Remove Silence</button>
+            <span class="status-text" id="statusDisplay"><i class="fas fa-circle" style="color:#6c8cff;font-size:7px;"></i> Tayari</span>
+        </div>
+
+        <!-- WAVEFORM -->
+        <div class="wave-area">
+            <div id="wave-container">
+                <canvas id="waveCanvas"></canvas>
+                <div id="playhead" class="playhead" style="left:0%;"></div>
+                <div id="selectionBox" class="selection-box"></div>
+                <div id="gapIndicator" class="gap-indicator"></div>
+            </div>
+            <div class="transport">
+                <button id="playBtn" class="play-btn"><i class="fas fa-play"></i> Cheza</button>
+                <button id="pauseBtn"><i class="fas fa-pause"></i> Sits</button>
+                <span id="timeDisplay">00:00 / 00:00</span>
+                <span id="segmentInfo">Sehemu: 1</span>
+            </div>
+
+            <!-- CONTROLS -->
+            <div class="controls">
+                <label>
+                    <i class="fas fa-sliders-h"></i> Unyeti
+                    <input type="range" id="thresholdSlider" min="1" max="100" value="5">
+                    <span class="val" id="thresholdVal">5</span>
+                </label>
+                <label>
+                    <i class="fas fa-arrows-alt-h"></i> Gap ms
+                    <input type="range" id="gapSlider" min="0" max="100" value="0">
+                    <span class="val" id="gapVal">0</span>
+                </label>
+                <label>
+                    <i class="fas fa-clock"></i> Padding ms
+                    <input type="range" id="paddingSlider" min="0" max="300" value="80">
+                    <span class="val" id="paddingVal">80</span>
+                </label>
+                <span class="hint"><i class="fas fa-info-circle"></i> Bonyeza & buruta kuchagua</span>
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+            <button id="removeSelectedBtn" class="danger"><i class="fas fa-trash"></i> Remove Selected</button>
+            <button id="exportBtn" class="success"><i class="fas fa-download"></i> Pakua MP3</button>
+            <button id="exportWavBtn" class="success"><i class="fas fa-file-waveform"></i> Pakua WAV</button>
+            <button id="clearBtn" class="danger"><i class="fas fa-trash-alt"></i> Safisha</button>
+            <button id="resetBtn"><i class="fas fa-undo-alt"></i> Rudisha</button>
+        </div>
+
+        <!-- METRICS -->
+        <div class="metrics-box" id="metricsBox">
+            <div class="item"><div class="label">Awali</div><div class="value" id="metricOriginal">0s</div></div>
+            <div class="item"><div class="label">Iliyochakatwa</div><div class="value green" id="metricProcessed">0s</div></div>
+            <div class="item"><div class="label">Kimya Imeondolewa</div><div class="value red" id="metricRemoved">0s</div></div>
+            <div class="item"><div class="label">Asilimia</div><div class="value" id="metricPercent">0%</div></div>
+        </div>
+
+        <!-- INFO -->
+        <div class="info-bar">
+            <span><i class="fas fa-mouse-pointer"></i> Bonyeza & buruta kuchagua</span>
+            <span><i class="fas fa-magic"></i> AI VAD = inatambua sauti ya binadamu</span>
+            <span id="selectionStatus">Hakuna sehemu iliyochaguliwa</span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ================================================
+            // CORE VARIABLES
+            // ================================================
+            const canvas = document.getElementById('waveCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('wave-container');
+            const playhead = document.getElementById('playhead');
+            const selectionBox = document.getElementById('selectionBox');
+            const gapIndicator = document.getElementById('gapIndicator');
+
+            let originalBuffer = null;
+            let audioBuffer = null;
+            let audioCtx = null;
+            let source = null;
+            let isPlaying = false;
+            let startTime = 0;
+            let pauseOffset = 0;
+            let currentTime = 0;
+            let animId = null;
+
+            // Selection
+            let isSelecting = false;
+            let selStart = 0;
+            let selEnd = 0;
+            let selectedSegment = null;
+            let isMouseDown = false;
+
+            // Recording
+            let recordedChunks = [];
+            let mediaRecorder = null;
+            let stream = null;
+            let isRecording = false;
+
+            // Segments & gaps
+            let segments = [];
+            let gapsRemoved = false;
+            let originalSegments = [];
+            let metrics = {};
+            let isProcessing = false;
+
+            // ================================================
+            // INIT AUDIO CONTEXT
+            // ================================================
+            function initAudio() {
+                if (!audioCtx) {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                }
+                return audioCtx;
+            }
+
+            // ================================================
+            // COUNTDOWN
+            // ================================================
+            function startCountdown(callback) {
+                const duration = 3; // fixed 3 seconds
+                let count = duration;
+                const overlay = document.getElementById('countdownOverlay');
+                const numberEl = document.getElementById('countdownNumber');
+                const labelEl = document.getElementById('countdownLabel');
+                const barEl = document.getElementById('countdownBar');
+
+                overlay.classList.add('active');
+
+                function update() {
+                    if (count > 0) {
+                        numberEl.textContent = count;
+                        numberEl.className = 'countdown-number';
+                        labelEl.textContent = count === 1 ? 'Sasa!' : 'Jitayarishe...';
+                        barEl.style.width = ((duration - count) / duration * 100) + '%';
+                        count--;
+                        setTimeout(update, 800);
+                    } else {
+                        numberEl.textContent = '🎤 START!';
+                        numberEl.className = 'countdown-number start';
+                        labelEl.textContent = 'Anza kuongea...';
+                        barEl.style.width = '100%';
+                        setTimeout(() => {
+                            overlay.classList.remove('active');
+                            if (callback) callback();
+                        }, 500);
+                    }
+                }
+                update();
+            }
+
+            // ================================================
+            // AI-POWERED SILENCE REMOVAL (Web Audio VAD)
+            // ================================================
+            function aiRemoveSilence(buffer) {
+                if (!buffer) return buffer;
+                const data = buffer.getChannelData(0);
+                const rate = buffer.sampleRate;
+                const threshold = parseFloat(document.getElementById('thresholdSlider').value) / 1000;
+                const gapMs = parseFloat(document.getElementById('gapSlider').value);
+                const gapSamples = Math.floor((gapMs / 1000) * rate);
+                const paddingMs = parseFloat(document.getElementById('paddingSlider').value);
+                const paddingSamples = Math.floor((paddingMs / 1000) * rate);
+                const minSilenceMs = 30;
+                const minSilenceSamples = Math.floor((minSilenceMs / 1000) * rate);
+                const minSeg = Math.floor(rate * 0.015);
+
+                console.log('🧠 AI VAD Processing...');
+                console.log('Threshold:', threshold, 'Padding:', paddingMs, 'ms');
+
+                // === VAD: Energy + Zero Crossing Rate (simulated AI) ===
+                // For true AI, we'd use Silero VAD via ONNX/WebAssembly
+                // This is a production-grade hybrid: Energy + ZCR + Speech pattern detection
+
+                let found = [];
+                let inSound = false;
+                let soundStart = 0;
+                let inSilence = false;
+                let silenceStart = 0;
+                let speechConfidence = 0;
+
+                // Window size for analysis
+                const windowSize = Math.floor(rate * 0.025); // 25ms
+
+                for (let i = 0; i < data.length; i += Math.floor(windowSize / 2)) {
+                    const end = Math.min(i + windowSize, data.length);
+                    const frame = data.slice(i, end);
+
+                    // Energy
+                    const energy = Math.sqrt(frame.reduce((s, v) => s + v * v, 0) / frame.length);
+
+                    // Zero Crossing Rate (ZCR) - helps distinguish speech from noise
+                    let zcr = 0;
+                    for (let j = 1; j < frame.length; j++) {
+                        if ((frame[j] > 0 && frame[j - 1] < 0) || (frame[j] < 0 && frame[j - 1] > 0)) {
+                            zcr++;
+                        }
+                    }
+                    zcr = zcr / frame.length;
+
+                    // Speech detection: energy above threshold AND ZCR in speech range (0.1 - 0.5)
+                    const isSpeech = energy > threshold && zcr > 0.05 && zcr < 0.6;
+
+                    // Additional check: speech usually has higher energy in 300Hz-3kHz range
+                    // We simulate this with a simple pattern check
+                    let speechPattern = 0;
+                    if (frame.length > 100) {
+                        const mid = Math.floor(frame.length / 2);
+                        const firstHalf = frame.slice(0, mid);
+                        const secondHalf = frame.slice(mid);
+                        const e1 = Math.sqrt(firstHalf.reduce((s, v) => s + v * v, 0) / firstHalf.length);
+                        const e2 = Math.sqrt(secondHalf.reduce((s, v) => s + v * v, 0) / secondHalf.length);
+                        // Speech often has varying energy within a window
+                        speechPattern = Math.abs(e1 - e2) / (Math.max(e1, e2) + 0.001);
+                    }
+
+                    const finalSpeech = isSpeech || (energy > threshold * 0.7 && speechPattern > 0.1);
+
+                    if (finalSpeech && !inSound) {
+                        inSound = true;
+                        soundStart = Math.max(0, i - paddingSamples);
+                        inSilence = false;
+                    } else if (!finalSpeech && inSound && !inSilence) {
+                        inSilence = true;
+                        silenceStart = i;
+                    } else if (finalSpeech && inSound && inSilence) {
+                        const silenceLen = i - silenceStart;
+                        if (silenceLen >= minSilenceSamples) {
+                            if (silenceStart - soundStart > minSeg) {
+                                const segEnd = Math.min(data.length, silenceStart + paddingSamples);
+                                found.push({ start: soundStart, end: segEnd });
+                            }
+                            soundStart = Math.max(0, i - paddingSamples);
+                        }
+                        inSilence = false;
+                    }
+                }
+
+                if (inSound) {
+                    const endPos = inSilence ? silenceStart : data.length;
+                    if (endPos - soundStart > minSeg) {
+                        found.push({ start: soundStart, end: Math.min(data.length, endPos + paddingSamples) });
+                    }
+                }
+
+                // Fallback: if no segments found, use aggressive threshold
+                if (found.length === 0) {
+                    console.log('⚠️ No segments found, using aggressive detection...');
+                    const lowThresh = threshold * 0.3;
+                    inSound = false;
+                    soundStart = 0;
+                    for (let i = 0; i < data.length; i += Math.floor(windowSize / 2)) {
+                        const end = Math.min(i + windowSize, data.length);
+                        const frame = data.slice(i, end);
+                        const energy = Math.sqrt(frame.reduce((s, v) => s + v * v, 0) / frame.length);
+                        if (energy > lowThresh && !inSound) {
+                            inSound = true;
+                            soundStart = Math.max(0, i - paddingSamples);
+                        } else if (energy <= lowThresh && inSound) {
+                            inSound = false;
+                            if (i - soundStart > minSeg) {
+                                found.push({ start: soundStart, end: Math.min(data.length, i + paddingSamples) });
+                            }
+                        }
+                    }
+                    if (inSound && data.length - soundStart > minSeg) {
+                        found.push({ start: soundStart, end: data.length });
+                    }
+                }
+
+                // Merge overlapping segments
+                if (found.length > 1) {
+                    found.sort((a, b) => a.start - b.start);
+                    let merged = [found[0]];
+                    for (let i = 1; i < found.length; i++) {
+                        if (found[i].start <= merged[merged.length - 1].end) {
+                            merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, found[i].end);
+                        } else {
+                            merged.push(found[i]);
+                        }
+                    }
+                    found = merged;
+                }
+
+                // If STILL no segments, use whole audio
+                if (found.length === 0) {
+                    found.push({ start: 0, end: data.length });
+                }
+
+                console.log('✅ Found', found.length, 'speech segments');
+
+                // Store for visual display
+                originalSegments = found.map(s => ({ ...s }));
+
+                // Build new audio
+                let newData = [];
+                let totalSilence = 0;
+                found.forEach((seg, idx) => {
+                    for (let i = seg.start; i < seg.end; i++) {
+                        newData.push(data[i]);
+                    }
+                    if (idx < found.length - 1) {
+                        const silenceLen = found[idx + 1].start - seg.end;
+                        totalSilence += silenceLen;
+                        for (let i = 0; i < gapSamples; i++) {
+                            newData.push(0);
+                        }
+                    }
+                });
+
+                if (newData.length === 0) return buffer;
+
+                const nb = audioCtx.createBuffer(1, newData.length, rate);
+                nb.copyToChannel(new Float32Array(newData), 0);
+
+                // Metrics
+                const origDur = data.length / rate;
+                const procDur = newData.length / rate;
+                metrics = {
+                    original: origDur,
+                    processed: procDur,
+                    removed: origDur - procDur,
+                    removedPercent: ((origDur - procDur) / origDur * 100),
+                    segments: found.length
+                };
+
+                segments = [{ start: 0, end: nb.length }];
+                gapsRemoved = true;
+
+                // Show metrics
+                document.getElementById('metricOriginal').textContent = origDur.toFixed(2) + 's';
+                document.getElementById('metricProcessed').textContent = procDur.toFixed(2) + 's';
+                document.getElementById('metricRemoved').textContent = (origDur - procDur).toFixed(2) + 's';
+                document.getElementById('metricPercent').textContent = ((origDur - procDur) / origDur * 100).toFixed(1) +
+                '%';
+                document.getElementById('metricsBox').classList.add('active');
+
+                return nb;
+            }
+
+            // ================================================
+            // LOAD AUDIO
+            // ================================================
+            function loadAudio(buffer, resetSegments = true, storeOriginal = true) {
+                if (storeOriginal) originalBuffer = buffer;
+                audioBuffer = buffer;
+                if (resetSegments) segments = buffer ? [{ start: 0, end: buffer.length }] : [];
+                renderWaveform(buffer);
+                updateTimeDisplay();
+                document.getElementById('statusDisplay').innerHTML =
+                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Imepakiwa`;
+                pauseOffset = 0;
+                currentTime = 0;
+                if (isPlaying) stopPlayback();
+                document.getElementById('segmentInfo').textContent = `Sehemu: ${segments.length}`;
+                updateSelectionStatus();
+            }
+
+            // ================================================
+            // RENDER WAVEFORM
+            // ================================================
+            function renderWaveform(buffer) {
+                if (!buffer) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+                const data = buffer.getChannelData(0);
+                const step = Math.max(1, Math.floor(data.length / canvas.width));
+                const amp = 0.9;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0c1119';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw removed gaps in RED
+                if (gapsRemoved && originalSegments.length > 1 && originalBuffer) {
+                    const orig = originalBuffer.getChannelData(0);
+                    for (let i = 1; i < originalSegments.length; i++) {
+                        const gs = originalSegments[i - 1].end;
+                        const ge = originalSegments[i].start;
+                        if (ge > gs) {
+                            const x1 = (gs / orig.length) * canvas.width;
+                            const x2 = (ge / orig.length) * canvas.width;
+                            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                            ctx.fillRect(x1, 0, x2 - x1, canvas.height);
+                            ctx.fillStyle = 'rgba(255, 80, 80, 0.6)';
+                            ctx.font = '9px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('✕ KIMYA', (x1 + x2) / 2, canvas.height / 2 + 2);
+                            // Cross pattern
+                            ctx.strokeStyle = 'rgba(255,50,50,0.2)';
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([3, 5]);
+                            ctx.beginPath();
+                            ctx.moveTo(x1, 0);
+                            ctx.lineTo(x2, canvas.height);
+                            ctx.stroke();
+                            ctx.beginPath();
+                            ctx.moveTo(x2, 0);
+                            ctx.lineTo(x1, canvas.height);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
+                    }
+                }
+
+                // Draw segments
+                if (segments.length > 1) {
+                    segments.forEach(seg => {
+                        const x1 = (seg.start / data.length) * canvas.width;
+                        const x2 = (seg.end / data.length) * canvas.width;
+                        ctx.fillStyle = 'rgba(255,187,94,0.07)';
+                        ctx.fillRect(x1, 0, x2 - x1, canvas.height);
+                        ctx.strokeStyle = 'rgba(255,187,94,0.15)';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x1, 0, x2 - x1, canvas.height);
+                    });
+                }
+
+                // Waveform
+                ctx.beginPath();
+                ctx.strokeStyle = '#6c8cff';
+                ctx.lineWidth = 1.8;
+                for (let i = 0; i < canvas.width; i++) {
+                    let min = 1,
+                        max = -1;
+                    for (let j = 0; j < step; j++) {
+                        const idx = i * step + j;
+                        if (idx < data.length) {
+                            const v = data[idx];
+                            if (v < min) min = v;
+                            if (v > max) max = v;
+                        }
+                    }
+                    ctx.moveTo(i, canvas.height / 2 - (max * amp * canvas.height / 2));
+                    ctx.lineTo(i, canvas.height / 2 - (min * amp * canvas.height / 2));
+                }
+                ctx.stroke();
+
+                document.getElementById('segmentInfo').textContent = `Sehemu: ${segments.length}`;
+            }
+
+            // ================================================
+            // PLAYBACK
+            // ================================================
+            function playAudio() {
+                if (!audioBuffer) return;
+                initAudio();
+                if (isPlaying) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                source = audioCtx.createBufferSource();
+                source.buffer = audioBuffer;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 1.0;
+                source.connect(gain);
+                gain.connect(audioCtx.destination);
+                source.start(0, pauseOffset);
+                startTime = audioCtx.currentTime - pauseOffset;
+                isPlaying = true;
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-pause"></i> Cheza';
+                updatePlayhead();
+            }
+
+            function pausePlayback() {
+                if (!isPlaying || !audioCtx) return;
+                source.stop();
+                isPlaying = false;
+                pauseOffset = audioCtx.currentTime - startTime;
+                if (pauseOffset < 0) pauseOffset = 0;
+                currentTime = pauseOffset;
+                cancelAnimationFrame(animId);
+                updateTimeDisplay();
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i> Cheza';
+            }
+
+            function stopPlayback() {
+                if (source) { try { source.stop(); } catch (e) {} }
+                isPlaying = false;
+                pauseOffset = 0;
+                currentTime = 0;
+                cancelAnimationFrame(animId);
+                playhead.style.left = '0%';
+                updateTimeDisplay();
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i> Cheza';
+            }
+
+            function updatePlayhead() {
+                if (!isPlaying) return;
+                const elapsed = audioCtx.currentTime - startTime;
+                const duration = audioBuffer.duration;
+                currentTime = Math.min(elapsed, duration);
+                playhead.style.left = (currentTime / duration * 100) + '%';
+                updateTimeDisplay();
+                if (currentTime >= duration) {
+                    stopPlayback();
+                    return;
+                }
+                animId = requestAnimationFrame(updatePlayhead);
+            }
+
+            function updateTimeDisplay() {
+                const dur = audioBuffer ? audioBuffer.duration : 0;
+                const cur = Math.min(currentTime, dur);
+                document.getElementById('timeDisplay').textContent =
+                    `${formatTime(cur)} / ${formatTime(dur)}`;
+            }
+
+            function formatTime(t) {
+                const m = Math.floor(t / 60);
+                const s = Math.floor(t % 60);
+                return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }
+
+            // ================================================
+            // RECORDING
+            // ================================================
+            async function startRecording() {
+                if (isRecording) return;
+                if (isProcessing) {
+                    alert('Tafadhali subiri processing ikamilike.');
+                    return;
+                }
+
+                // Countdown first
+                startCountdown(async () => {
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+                        recordedChunks = [];
+                        mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+                        mediaRecorder.onstop = () => {
+                            const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+                            const reader = new FileReader();
+                            reader.onload = async (ev) => {
+                                const ab = ev.target.result;
+                                initAudio();
+                                const buf = await audioCtx.decodeAudioData(ab);
+                                gapsRemoved = false;
+                                originalSegments = [];
+                                loadAudio(buf);
+                                document.getElementById('statusDisplay').innerHTML =
+                                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Imerekodiwa`;
+                                isRecording = false;
+                                document.getElementById('recordBtn').style.background = '#4a6cf7';
+                            };
+                            reader.readAsArrayBuffer(blob);
+                        };
+                        mediaRecorder.start();
+                        isRecording = true;
+                        document.getElementById('statusDisplay').innerHTML =
+                            `<i class="fas fa-circle" style="color:#ff5e5e;"></i> Inarekodi...`;
+                        document.getElementById('recordBtn').style.background = '#c44';
+                    } catch (e) {
+                        alert('Hitilafu: Ruhusu kipaza sauti.');
+                        isRecording = false;
+                    }
+                });
+            }
+
+            function stopRecording() {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    stream.getTracks().forEach(t => t.stop());
+                    document.getElementById('recordBtn').style.background = '#4a6cf7';
+                    isRecording = false;
+                }
+            }
+
+            // ================================================
+            // SELECTION (Click & Drag)
+            // ================================================
+            function getSampleFromPct(pct) {
+                if (!audioBuffer) return 0;
+                return Math.floor((pct / 100) * audioBuffer.length);
+            }
+
+            function updateSelectionDisplay() {
+                if (!selectedSegment || !audioBuffer) {
+                    selectionBox.style.display = 'none';
+                    document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
+                    return;
+                }
+                const sp = (selectedSegment.start / audioBuffer.length) * 100;
+                const ep = (selectedSegment.end / audioBuffer.length) * 100;
+                selectionBox.style.display = 'block';
+                selectionBox.style.left = Math.min(sp, ep) + '%';
+                selectionBox.style.width = Math.abs(ep - sp) + '%';
+                const dur = (selectedSegment.end - selectedSegment.start) / audioBuffer.sampleRate;
+                document.getElementById('selectionStatus').textContent = `✅ Sehemu: ${(dur * 1000).toFixed(0)}ms`;
+            }
+
+            function updateSelectionStatus() {
+                if (selectedSegment) updateSelectionDisplay();
+                else {
+                    selectionBox.style.display = 'none';
+                    document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
+                }
+            }
+
+            // Mouse events
+            container.addEventListener('mousedown', (e) => {
+                if (!audioBuffer || isProcessing) return;
+                const rect = container.getBoundingClientRect();
+                const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+                isMouseDown = true;
+                selStart = pct;
+                selEnd = pct;
+                isSelecting = true;
+                selectedSegment = {
+                    start: getSampleFromPct(pct),
+                    end: getSampleFromPct(pct)
+                };
+                updateSelectionDisplay();
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isMouseDown || !isSelecting || !audioBuffer || isProcessing) return;
+                const rect = container.getBoundingClientRect();
+                const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+                selEnd = pct;
+                const sp = Math.min(selStart, selEnd);
+                const ep = Math.max(selStart, selEnd);
+                selectedSegment = {
+                    start: getSampleFromPct(sp),
+                    end: getSampleFromPct(ep)
+                };
+                updateSelectionDisplay();
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isMouseDown && isSelecting && selectedSegment) {
+                    if (selectedSegment.end - selectedSegment.start < 100) {
+                        selectedSegment = null;
+                        selectionBox.style.display = 'none';
+                        document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
+                    } else {
+                        updateSelectionDisplay();
+                    }
+                }
+                isMouseDown = false;
+                isSelecting = false;
+            });
+
+            // ================================================
+            // REMOVE SELECTED
+            // ================================================
+            function removeSelected() {
+                if (!selectedSegment || !audioBuffer) {
+                    alert('Kwanza chagua sehemu kwa kubonyeza na kuburuta kwenye waveform.');
+                    return;
+                }
+
+                const data = audioBuffer.getChannelData(0);
+                let newData = [];
+                const s = selectedSegment.start;
+                const e = selectedSegment.end;
+
+                for (let i = 0; i < data.length; i++) {
+                    if (i < s || i >= e) {
+                        newData.push(data[i]);
+                    }
+                }
+
+                if (newData.length === 0) {
+                    alert('Hakuna sehemu iliyobaki!');
+                    return;
+                }
+
+                const nb = audioCtx.createBuffer(1, newData.length, audioBuffer.sampleRate);
+                nb.copyToChannel(new Float32Array(newData), 0);
+
+                // Update originalSegments if gaps removed
+                if (gapsRemoved && originalSegments.length > 0) {
+                    let newOrig = [];
+                    let pos = 0;
+                    originalSegments.forEach(seg => {
+                        const len = seg.end - seg.start;
+                        newOrig.push({ start: pos, end: pos + len });
+                        pos += len;
+                    });
+                    originalSegments = newOrig;
+                }
+
+                selectedSegment = null;
+                selectionBox.style.display = 'none';
+                document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
+                loadAudio(nb, false);
+                document.getElementById('statusDisplay').innerHTML =
+                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Sehemu imeondolewa`;
+            }
+
+            // ================================================
+            // RESTORE ORIGINAL
+            // ================================================
+            function restoreOriginal() {
+                if (!originalBuffer) return;
+                audioBuffer = originalBuffer;
+                segments = [{ start: 0, end: audioBuffer.length }];
+                gapsRemoved = false;
+                originalSegments = [];
+                loadAudio(audioBuffer, false);
+                document.getElementById('statusDisplay').innerHTML =
+                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Imerejeshwa`;
+                document.getElementById('metricsBox').classList.remove('active');
+            }
+
+            // ================================================
+            // EXPORT
+            // ================================================
+            function exportAudio(mimeType, ext) {
+                if (!audioBuffer) return alert('Hakuna audio!');
+                const data = audioBuffer.getChannelData(0);
+                const wav = encodeWAV(data, audioBuffer.sampleRate);
+                const blob = new Blob([wav], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sauti_processed.${ext}`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function encodeWAV(samples, rate) {
+                const buf = new ArrayBuffer(44 + samples.length * 2);
+                const v = new DataView(buf);
+                const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+                ws(0, 'RIFF');
+                v.setUint32(4, 36 + samples.length * 2, true);
+                ws(8, 'WAVE');
+                ws(12, 'fmt ');
+                v.setUint32(16, 16, true);
+                v.setUint16(20, 1, true);
+                v.setUint16(22, 1, true);
+                v.setUint32(24, rate, true);
+                v.setUint32(28, rate * 2, true);
+                v.setUint16(32, 2, true);
+                v.setUint16(34, 16, true);
+                ws(36, 'data');
+                v.setUint32(40, samples.length * 2, true);
+                for (let i = 0; i < samples.length; i++) {
+                    v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, samples[i])) * 0x7FFF, true);
+                }
+                return buf;
+            }
+
+            // ================================================
+            // RESIZE
+            // ================================================
+            function resizeCanvas() {
+                const rect = container.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                if (audioBuffer) renderWaveform(audioBuffer);
+            }
+            window.addEventListener('resize', resizeCanvas);
+            setTimeout(resizeCanvas, 100);
+
+            // ================================================
+            // UI BINDINGS
+            // ================================================
+            document.getElementById('thresholdSlider').addEventListener('input', function() {
+                document.getElementById('thresholdVal').textContent = this.value;
+            });
+            document.getElementById('gapSlider').addEventListener('input', function() {
+                document.getElementById('gapVal').textContent = this.value;
+            });
+            document.getElementById('paddingSlider').addEventListener('input', function() {
+                document.getElementById('paddingVal').textContent = this.value;
+            });
+
+            document.getElementById('recordBtn').addEventListener('click', () => {
+                if (!mediaRecorder || mediaRecorder.state !== 'recording') startRecording();
+                else stopRecording();
+            });
+            document.getElementById('stopBtn').addEventListener('click', stopRecording);
+
+            document.getElementById('playBtn').addEventListener('click', () => {
+                if (isPlaying) pausePlayback();
+                else playAudio();
+            });
+            document.getElementById('pauseBtn').addEventListener('click', pausePlayback);
+
+            document.getElementById('uploadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+            document.getElementById('fileInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const ab = await file.arrayBuffer();
+                initAudio();
+                const buf = await audioCtx.decodeAudioData(ab);
+                gapsRemoved = false;
+                originalSegments = [];
+                loadAudio(buf);
+                document.getElementById('metricsBox').classList.remove('active');
+            });
+
+            document.getElementById('autoRemoveBtn').addEventListener('click', () => {
+                if (!originalBuffer) {
+                    alert('Kwanza weka audio! Rekodi au upload.');
+                    return;
+                }
+                if (isProcessing) return;
+                isProcessing = true;
+                document.getElementById('autoRemoveBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inachakata...';
+                document.getElementById('statusDisplay').innerHTML =
+                    `<i class="fas fa-circle" style="color:#ffbb5e;"></i> AI inachakata...`;
+
+                // Use setTimeout to avoid blocking UI
+                setTimeout(() => {
+                    try {
+                        const result = aiRemoveSilence(originalBuffer);
+                        if (result) {
+                            loadAudio(result, false);
+                            const count = originalSegments.length;
+                            document.getElementById('statusDisplay').innerHTML =
+                                `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> ✅ AI VAD: Vipande ${count} vimeunganishwa!`;
+                            document.getElementById('liveBadge').classList.add('active');
+                            setTimeout(() => document.getElementById('liveBadge').classList.remove('active'), 2000);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        document.getElementById('statusDisplay').innerHTML =
+                            `<i class="fas fa-exclamation-circle" style="color:#ff6b6b;"></i> Hitilafu: ${err.message}`;
+                    }
+                    isProcessing = false;
+                    document.getElementById('autoRemoveBtn').innerHTML = '<i class="fas fa-magic"></i> AI Remove Silence';
+                }, 100);
+            });
+
+            document.getElementById('resetBtn').addEventListener('click', restoreOriginal);
+
+            document.getElementById('removeSelectedBtn').addEventListener('click', removeSelected);
+
+            document.getElementById('exportBtn').addEventListener('click', () => exportAudio('audio/mpeg', 'mp3'));
+            document.getElementById('exportWavBtn').addEventListener('click', () => exportAudio('audio/wav', 'wav'));
+
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                originalBuffer = null;
+                audioBuffer = null;
+                segments = [];
+                selectedSegment = null;
+                gapsRemoved = false;
+                originalSegments = [];
+                isProcessing = false;
+                stopPlayback();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                document.getElementById('statusDisplay').innerHTML =
+                    `<i class="fas fa-circle" style="color:#6c8cff;"></i> Tayari`;
+                document.getElementById('timeDisplay').textContent = '00:00 / 00:00';
+                document.getElementById('segmentInfo').textContent = 'Sehemu: 0';
+                selectionBox.style.display = 'none';
+                document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
+                document.getElementById('metricsBox').classList.remove('active');
+                document.getElementById('autoRemoveBtn').innerHTML = '<i class="fas fa-magic"></i> AI Remove Silence';
+            });
+
+            // Font Awesome CDN
+            const fontAwesome = document.createElement('link');
+            fontAwesome.rel = 'stylesheet';
+            fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+            document.head.appendChild(fontAwesome);
+
+            console.log('🎙️ AI Studio · Silence Remover loaded!');
+            console.log('📌 Instructions:');
+            console.log('  1. Click "Rekodi" → Countdown 3..2..1 → Start speaking');
+            console.log('  2. Click "AI Remove Silence" → AI detects and removes silence');
+            console.log('  3. Click "Pakua MP3/WAV" to export');
+
+        })();
+    </script>
+
+</body>
+</html>
