@@ -1,1411 +1,916 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Studio · Silence Remover</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #0a0d14;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            color: #eef2f6;
-            padding: 16px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            background: #11171f;
-            border-radius: 40px;
-            padding: 28px 32px 36px;
-            border: 1px solid #26303e;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-        }
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .header h1 i {
-            color: #6c8cff;
-        }
-        .badge {
-            background: linear-gradient(135deg, #4a6cf7, #6c3ce0);
-            padding: 4px 16px;
-            border-radius: 40px;
-            font-size: 0.6rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .badge-ai {
-            background: linear-gradient(135deg, #c4902a, #e0aa3a);
-        }
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            align-items: center;
-            background: #1a232f;
-            padding: 10px 16px;
-            border-radius: 60px;
-            margin-bottom: 18px;
-            border: 1px solid #2a3547;
-        }
-        .toolbar button {
-            background: #283344;
-            border: none;
-            color: #d6dfec;
-            padding: 7px 18px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            border: 1px solid #3a475e;
-            transition: 0.2s;
-        }
-        .toolbar button:hover {
-            background: #3a4a60;
-            color: #fff;
-        }
-        .toolbar button.primary {
-            background: #4a6cf7;
-            border-color: #4a6cf7;
-            color: #fff;
-        }
-        .toolbar button.primary:hover {
-            background: #5f7cff;
-            box-shadow: 0 0 20px #4a6cf766;
-        }
-        .toolbar button.success {
-            background: #1f8f5a;
-            border-color: #2aad6e;
-            color: #fff;
-        }
-        .toolbar button.success:hover {
-            background: #2ab06e;
-        }
-        .toolbar button.warning {
-            background: #c4902a;
-            border-color: #e0aa3a;
-            color: #fff;
-        }
-        .toolbar button.warning:hover {
-            background: #dbaa3a;
-        }
-        .toolbar button.danger {
-            background: #8f2a2a;
-            border-color: #c44a4a;
-            color: #fff;
-        }
-        .toolbar button.danger:hover {
-            background: #b43a3a;
-        }
-        .sep {
-            width: 1px;
-            height: 26px;
-            background: #3b475c;
-        }
-        .status-text {
-            font-size: 0.75rem;
-            color: #95a9c9;
-            margin-left: auto;
-            padding: 4px 14px;
-            background: #141d29;
-            border-radius: 30px;
-            border: 1px solid #2a3547;
-            white-space: nowrap;
-        }
-        .file-hidden {
-            display: none;
-        }
-
-        .wave-area {
-            background: #0e141e;
-            border-radius: 24px;
-            padding: 16px;
-            border: 1px solid #25303f;
-            margin-bottom: 14px;
-        }
-        #wave-container {
-            width: 100%;
-            height: 140px;
-            background: #090d15;
-            border-radius: 16px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            user-select: none;
-        }
-        #wave-container canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        .playhead {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 3px;
-            height: 100%;
-            background: #ffbb5e;
-            pointer-events: none;
-            box-shadow: 0 0 16px #ffbb5eaa;
-            z-index: 5;
-            transition: left 0.05s linear;
-        }
-        .selection-box {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            background: rgba(74, 108, 247, 0.25);
-            border: 2px solid #4a6cf7;
-            pointer-events: none;
-            z-index: 4;
-            display: none;
-        }
-        .gap-indicator {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            background: rgba(255, 0, 0, 0.2);
-            border-left: 2px solid rgba(255, 0, 0, 0.5);
-            border-right: 2px solid rgba(255, 0, 0, 0.5);
-            pointer-events: none;
-            z-index: 3;
-            display: none;
-        }
-
-        .transport {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .transport button {
-            background: transparent;
-            border: none;
-            color: #bcc9e0;
-            font-size: 1.3rem;
-            padding: 4px 10px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .transport button:hover {
-            background: #1f2a3a;
-        }
-        .transport .play-btn {
-            background: #4a6cf7;
-            color: #fff;
-            padding: 6px 24px;
-            font-size: 1rem;
-            border-radius: 60px;
-            font-weight: 700;
-        }
-        .transport .play-btn:hover {
-            background: #5f7cff;
-        }
-        #timeDisplay {
-            font-size: 0.85rem;
-            color: #a2b7d6;
-            font-weight: 500;
-            font-variant-numeric: tabular-nums;
-        }
-        #segmentInfo {
-            font-size: 0.75rem;
-            color: #7a8fae;
-            margin-left: auto;
-        }
-
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            background: #1a232f;
-            padding: 10px 18px;
-            border-radius: 40px;
-            margin-top: 12px;
-            border: 1px solid #2a3547;
-            align-items: center;
-        }
-        .controls label {
-            font-size: 0.7rem;
-            color: #9aacc9;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-        }
-        .controls input[type="range"] {
-            width: 70px;
-            background: #2e3a4e;
-            height: 3px;
-            border-radius: 10px;
-            -webkit-appearance: none;
-        }
-        .controls input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: #ffbb5e;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .controls .val {
-            min-width: 20px;
-            color: #ffbb5e;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-        .controls .hint {
-            color: #5fec7a;
-            font-size: 0.6rem;
-            margin-left: 8px;
-        }
-
-        .actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 12px 0 8px;
-        }
-        .actions button {
-            background: #1f2838;
-            border: 1px solid #32405a;
-            padding: 6px 16px;
-            border-radius: 40px;
-            color: #cbd8ed;
-            font-weight: 500;
-            font-size: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .actions button:hover {
-            background: #2e3d57;
-            color: #fff;
-        }
-        .actions button.success {
-            background: #1f8f5a;
-            border-color: #2aad6e;
-            color: #fff;
-        }
-        .actions button.danger {
-            background: #8f2a2a;
-            border-color: #c44a4a;
-            color: #fff;
-        }
-        .actions button.warning {
-            background: #c4902a;
-            border-color: #e0aa3a;
-            color: #fff;
-        }
-        .actions button.primary {
-            background: #4a6cf7;
-            border-color: #4a6cf7;
-            color: #fff;
-        }
-
-        .info-bar {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-            color: #6a7f9e;
-            font-size: 0.7rem;
-        }
-        .info-bar span {
-            background: #141d29;
-            padding: 2px 12px;
-            border-radius: 20px;
-            border: 1px solid #1f2a3a;
-        }
-
-        .countdown-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.92);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 9999;
-            backdrop-filter: blur(8px);
-        }
-        .countdown-overlay.active {
-            display: flex;
-        }
-        .countdown-number {
-            font-size: 160px;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 0 0 80px rgba(74, 108, 247, 0.5);
-            animation: pulseCount 0.8s ease;
-        }
-        .countdown-number.start {
-            color: #5fec7a;
-            font-size: 80px;
-        }
-        .countdown-label {
-            color: #8899bb;
-            font-size: 16px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-top: 8px;
-        }
-        .countdown-bar {
-            width: 200px;
-            height: 3px;
-            background: #1a2533;
-            border-radius: 10px;
-            margin-top: 24px;
-            overflow: hidden;
-        }
-        .countdown-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4a6cf7, #5fec7a);
-            width: 0%;
-            border-radius: 10px;
-            transition: width 0.1s linear;
-        }
-        @keyframes pulseCount {
-            0% {
-                transform: scale(1.5);
-                opacity: 0.3;
-            }
-            50% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .live-badge {
-            background: #1f8f5a;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 0.55rem;
-            color: #fff;
-            display: none;
-            align-items: center;
-            gap: 4px;
-        }
-        .live-badge.active {
-            display: inline-flex;
-        }
-        .live-badge .dot {
-            width: 5px;
-            height: 5px;
-            background: #5fec7a;
-            border-radius: 50%;
-            animation: pulseDot 0.8s infinite;
-        }
-        @keyframes pulseDot {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.3;
-            }
-        }
-
-        .metrics-box {
-            background: #1a232f;
-            border-radius: 16px;
-            padding: 12px 18px;
-            margin-top: 10px;
-            border: 1px solid #2a3547;
-            display: none;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 8px;
-        }
-        .metrics-box.active {
-            display: grid;
-        }
-        .metrics-box .item {
-            text-align: center;
-            padding: 6px;
-        }
-        .metrics-box .item .label {
-            font-size: 0.6rem;
-            color: #7a8fae;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .metrics-box .item .value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #ffbb5e;
-        }
-        .metrics-box .item .value.green {
-            color: #5fec7a;
-        }
-        .metrics-box .item .value.red {
-            color: #ff6b6b;
-        }
-
-        @media (max-width: 700px) {
-            .container {
-                padding: 12px;
-            }
-            .toolbar {
-                border-radius: 30px;
-                padding: 8px 10px;
-            }
-            .toolbar button {
-                font-size: 0.7rem;
-                padding: 5px 12px;
-            }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .header h1 {
-                font-size: 1.3rem;
-            }
-            .countdown-number {
-                font-size: 100px;
-            }
-            .metrics-box {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AI Studio Pro · Final</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f6;padding:10px;min-height:100vh}
+.container{max-width:1360px;margin:0 auto;background:#0d121b;border-radius:20px;padding:16px 18px 22px;border:1px solid #1c2536}
+.header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.header h1{font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.header h1 i{color:#60a5fa}
+.badge{background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:3px 10px;border-radius:16px;font-size:0.55rem;font-weight:700;color:#fff}
+.badge-ai{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#172033;padding:8px 12px;border-radius:30px;margin-bottom:12px;border:1px solid #2a364d}
+.toolbar button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:6px 13px;border-radius:18px;font-weight:600;font-size:0.74rem;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.toolbar button:hover{background:#3b4b66}
+.toolbar button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.toolbar button.success{background:#10b981;border-color:#10b981;color:#fff}
+.toolbar button.warning{background:#f59e0b;border-color:#f59e0b;color:#fff}
+.toolbar button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
+.sep{width:1px;height:22px;background:#3b4b66}
+.status-text{font-size:0.7rem;color:#94a3b8;margin-left:auto;padding:3px 10px;background:#0f172a;border-radius:14px}
+.rec-timer{background:#ef4444;color:#fff;padding:3px 10px;border-radius:12px;font-size:0.74rem;font-weight:700;display:none}
+.rec-timer.active{display:inline-block}
+.main-grid{display:grid;grid-template-columns:1fr 300px;gap:14px}
+@media(max-width:980px){.main-grid{grid-template-columns:1fr}}
+.preview-panel{background:#0f172a;border-radius:16px;border:1px solid #1e293b;overflow:hidden}
+.preview-header{padding:8px 12px;background:#1e293b;display:flex;justify-content:space-between;align-items:center;font-size:0.73rem;color:#94a3b8}
+#previewCanvas{width:100%;background:#000;display:block;cursor:grab}
+.preview-controls{padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:#0f172a}
+.preview-controls button,.preview-controls select{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 10px;border-radius:12px;font-size:0.72rem;cursor:pointer}
+.preview-controls button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.side-panel{display:flex;flex-direction:column;gap:10px}
+.panel{background:#172033;border-radius:14px;border:1px solid #2a364d;padding:11px 13px}
+.panel h3{font-size:0.8rem;color:#fbbf24;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.panel label{font-size:0.67rem;color:#94a3b8;display:block;margin-bottom:3px}
+.panel input[type=text],.panel select,.panel textarea,.panel input[type=number]{width:100%;background:#0f172a;border:1px solid #2a364d;color:#e2e8f0;padding:6px 9px;border-radius:8px;font-size:0.75rem;margin-bottom:6px}
+.panel textarea{min-height:46px;resize:vertical}
+.btn-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.btn-row button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 10px;border-radius:8px;font-size:0.7rem;cursor:pointer}
+.btn-row button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.btn-row button.success{background:#10b981;border-color:#10b981;color:#fff}
+.btn-row button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
+.image-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;max-height:90px;overflow-y:auto}
+.thumb-wrap{position:relative;display:inline-block}
+.image-thumb{width:46px;height:46px;border-radius:7px;object-fit:cover;border:2px solid #3b4b66;cursor:pointer}
+.thumb-del{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;width:16px;height:16px;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+.wave-area{background:#0f172a;border-radius:14px;padding:10px;border:1px solid #1e293b;margin-top:10px}
+#wave-container{width:100%;height:82px;background:#020617;border-radius:10px;position:relative;overflow:hidden;cursor:crosshair}
+#waveCanvas{display:block;width:100%;height:100%}
+.playhead{position:absolute;top:0;left:0;width:2px;height:100%;background:#fbbf24;box-shadow:0 0 8px #fbbf24aa;z-index:5;pointer-events:none}
+.selection-region{position:absolute;top:0;height:100%;background:rgba(239,68,68,0.28);border:1px solid #ef4444;z-index:4;display:none;pointer-events:none}
+.transport{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.transport button{background:transparent;border:none;color:#cbd5e1;font-size:1rem;padding:3px 7px;cursor:pointer}
+.transport .play-btn{background:#3b82f6;color:#fff;padding:5px 14px;font-size:0.82rem;border-radius:22px;font-weight:700}
+#timeDisplay{font-size:0.74rem;color:#94a3b8}
+.controls{display:flex;flex-wrap:wrap;gap:8px 12px;background:#172033;padding:7px 12px;border-radius:22px;margin-top:6px;border:1px solid #2a364d;align-items:center}
+.controls label{font-size:0.64rem;color:#94a3b8;display:flex;align-items:center;gap:4px}
+.controls input[type=range]{width:52px;height:3px;background:#2a364d;border-radius:6px;-webkit-appearance:none}
+.controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:#fbbf24;border-radius:50%;cursor:pointer}
+.controls .val{min-width:16px;color:#fbbf24;font-weight:600;font-size:0.66rem}
+.metrics-box{background:#172033;border-radius:10px;padding:8px 12px;margin-top:8px;border:1px solid #2a364d;display:none;grid-template-columns:repeat(4,1fr);gap:4px}
+.metrics-box.active{display:grid}
+.metrics-box .item{text-align:center}
+.metrics-box .item .label{font-size:0.54rem;color:#64748b;text-transform:uppercase}
+.metrics-box .item .value{font-size:0.88rem;font-weight:700;color:#fbbf24}
+.metrics-box .item .value.green{color:#34d399}
+.metrics-box .item .value.red{color:#f87171}
+.info-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;color:#64748b;font-size:0.64rem}
+.info-bar span{background:#0f172a;padding:2px 8px;border-radius:11px;border:1px solid #1e293b}
+.countdown-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:9999}
+.countdown-overlay.active{display:flex}
+.countdown-number{font-size:115px;font-weight:800;color:#fff}
+.countdown-number.start{color:#34d399;font-size:56px}
+.file-hidden{display:none}
+</style>
 </head>
 <body>
+<div class="countdown-overlay" id="countdownOverlay">
+    <div class="countdown-number" id="countdownNumber">3</div>
+</div>
 
-    <!-- COUNTDOWN OVERLAY -->
-    <div class="countdown-overlay" id="countdownOverlay">
-        <div class="countdown-number" id="countdownNumber">3</div>
-        <div class="countdown-label" id="countdownLabel">Tayari</div>
-        <div class="countdown-bar">
-            <div class="countdown-bar-fill" id="countdownBar"></div>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Final</span> <span class="badge badge-ai">AI Clean</span></h1>
+    </div>
+
+    <div class="toolbar">
+        <button id="recordBtn" class="primary"><i class="fas fa-circle"></i> Rekodi</button>
+        <button id="stopBtn" class="danger"><i class="fas fa-stop"></i></button>
+        <span class="rec-timer" id="recTimer">00:00</span>
+        <div class="sep"></div>
+        <button id="uploadAudioBtn"><i class="fas fa-upload"></i> Audio</button>
+        <input type="file" id="audioInput" class="file-hidden" accept="audio/*">
+        <button id="uploadImageBtn"><i class="fas fa-images"></i> Picha</button>
+        <input type="file" id="imageInput" class="file-hidden" accept="image/*" multiple>
+        <button id="uploadOverlayBtn"><i class="fas fa-layer-group"></i> Overlay</button>
+        <input type="file" id="overlayInput" class="file-hidden" accept="image/*">
+        <div class="sep"></div>
+        <button id="autoRemoveBtn" class="warning"><i class="fas fa-magic"></i> Ondoa Silence</button>
+        <button id="enhanceBtn" class="success"><i class="fas fa-sliders"></i> Studio Boost</button>
+        <span class="status-text" id="statusDisplay">Tayari</span>
+    </div>
+
+    <div class="main-grid">
+        <div>
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <span>Preview • Overlay & Text unaweza kuihamisha free</span>
+                    <span id="previewRes">1280×720</span>
+                </div>
+                <canvas id="previewCanvas" width="1280" height="720"></canvas>
+                <div class="preview-controls">
+                    <button id="playPreviewBtn" class="primary"><i class="fas fa-play"></i> Cheza</button>
+                    <button id="stopPreviewBtn"><i class="fas fa-stop"></i></button>
+                    <select id="aspectSelect">
+                        <option value="16:9">16:9</option>
+                        <option value="9:16">9:16</option>
+                        <option value="1:1">1:1</option>
+                    </select>
+                    <select id="resSelect">
+                        <option value="1080">1080p</option>
+                        <option value="720" selected>720p</option>
+                        <option value="480">480p</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="wave-area">
+                <div id="wave-container">
+                    <canvas id="waveCanvas"></canvas>
+                    <div id="playhead" class="playhead"></div>
+                    <div id="selectionRegion" class="selection-region"></div>
+                </div>
+                <div class="transport">
+                    <button id="playBtn" class="play-btn"><i class="fas fa-play"></i></button>
+                    <button id="pauseBtn"><i class="fas fa-pause"></i></button>
+                    <button id="deleteRegionBtn" style="background:#ef4444;color:#fff;border:none;padding:5px 12px;border-radius:14px;font-size:0.73rem;cursor:pointer">
+                        <i class="fas fa-trash"></i> Futa Sehemu
+                    </button>
+                    <span id="timeDisplay">00:00 / 00:00</span>
+                </div>
+                <div class="controls">
+                    <label>Threshold <input type="range" id="thresholdSlider" min="30" max="55" value="45"><span class="val" id="thresholdVal">-45dB</span></label>
+                    <label>Min Silence <input type="range" id="minSilenceSlider" min="300" max="900" value="500"><span class="val" id="minSilenceVal">500ms</span></label>
+                    <label>Padding <input type="range" id="paddingSlider" min="20" max="100" value="50"><span class="val" id="paddingVal">50ms</span></label>
+                    <label>Crossfade <input type="range" id="fadeSlider" min="8" max="30" value="15"><span class="val" id="fadeVal">15ms</span></label>
+                    <label>Boost <input type="range" id="boostSlider" min="120" max="230" value="165"><span class="val" id="boostVal">165%</span></label>
+                </div>
+            </div>
+
+            <div class="metrics-box" id="metricsBox">
+                <div class="item"><div class="label">Awali</div><div class="value" id="metricOriginal">0s</div></div>
+                <div class="item"><div class="label">Baada</div><div class="value green" id="metricProcessed">0s</div></div>
+                <div class="item"><div class="label">Kimya</div><div class="value red" id="metricRemoved">0s</div></div>
+                <div class="item"><div class="label">%</div><div class="value" id="metricPercent">0%</div></div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="panel">
+                <h3><i class="fas fa-images"></i> Picha + Overlay</h3>
+                <div class="btn-row">
+                    <button id="addImageBtn" class="primary"><i class="fas fa-plus"></i> Picha</button>
+                    <button id="clearImagesBtn" class="danger">Futa</button>
+                </div>
+                <div class="image-list" id="imageList"></div>
+                <label style="margin-top:7px">Effect</label>
+                <select id="imageEffect">
+                    <option value="fade">Fade</option>
+                    <option value="zoom">Zoom In</option>
+                    <option value="kenburns">Ken Burns</option>
+                    <option value="vibrant">Vibrant</option>
+                </select>
+                <label style="margin-top:7px">Overlay Size</label>
+                <input type="range" id="overlaySize" min="15" max="60" value="30" style="width:100%">
+            </div>
+
+            <div class="panel">
+                <h3><i class="fas fa-font"></i> Text (Free)</h3>
+                <textarea id="textInput" placeholder="Andika text..."></textarea>
+                <div style="display:flex;gap:6px">
+                    <select id="textFont" style="flex:1">
+                        <option value="Arial Black">Arial Black</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Georgia">Georgia</option>
+                    </select>
+                    <input type="number" id="textSize" value="56" min="18" max="160" style="width:60px">
+                </div>
+                <div style="display:flex;gap:6px">
+                    <input type="color" id="textColor" value="#ffffff" style="flex:1;height:30px">
+                    <input type="color" id="textBg" value="#000000" style="flex:1;height:30px">
+                </div>
+                <label><input type="checkbox" id="textBold" checked> Bold</label>
+                <label><input type="checkbox" id="textBgEnable"> Background</label>
+                <div class="btn-row">
+                    <button id="addTextBtn" class="primary">Ongeza</button>
+                    <button id="clearTextBtn" class="danger">Futa</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3><i class="fas fa-download"></i> Pakua</h3>
+                <div class="btn-row">
+                    <button id="exportVideoBtn" class="success"><i class="fas fa-video"></i> Video</button>
+                    <button id="exportWavBtn"><i class="fas fa-file-audio"></i> WAV</button>
+                    <button id="exportMp3Btn"><i class="fas fa-music"></i> MP3</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1>
-                <i class="fas fa-microphone-alt"></i>
-                AI Studio
-                <span class="badge">Silence Remover</span>
-                <span class="badge badge-ai">🧠 AI VAD</span>
-            </h1>
-            <span class="live-badge" id="liveBadge"><span class="dot"></span> LIVE</span>
-        </div>
-
-        <!-- TOOLBAR -->
-        <div class="toolbar">
-            <button id="recordBtn" class="primary"><i class="fas fa-circle"></i> Rekodi</button>
-            <button id="stopBtn" class="danger"><i class="fas fa-stop"></i> Simamisha</button>
-            <div class="sep"></div>
-            <button id="uploadBtn"><i class="fas fa-upload"></i> Weka</button>
-            <input type="file" id="fileInput" class="file-hidden" accept="audio/*">
-            <div class="sep"></div>
-            <button id="autoRemoveBtn" class="warning" style="font-weight:700;"><i class="fas fa-magic"></i> AI Remove Silence</button>
-            <span class="status-text" id="statusDisplay"><i class="fas fa-circle" style="color:#6c8cff;font-size:7px;"></i> Tayari</span>
-        </div>
-
-        <!-- WAVEFORM -->
-        <div class="wave-area">
-            <div id="wave-container">
-                <canvas id="waveCanvas"></canvas>
-                <div id="playhead" class="playhead" style="left:0%;"></div>
-                <div id="selectionBox" class="selection-box"></div>
-                <div id="gapIndicator" class="gap-indicator"></div>
-            </div>
-            <div class="transport">
-                <button id="playBtn" class="play-btn"><i class="fas fa-play"></i> Cheza</button>
-                <button id="pauseBtn"><i class="fas fa-pause"></i> Sits</button>
-                <span id="timeDisplay">00:00 / 00:00</span>
-                <span id="segmentInfo">Sehemu: 1</span>
-            </div>
-
-            <!-- CONTROLS -->
-            <div class="controls">
-                <label>
-                    <i class="fas fa-sliders-h"></i> Unyeti
-                    <input type="range" id="thresholdSlider" min="1" max="100" value="5">
-                    <span class="val" id="thresholdVal">5</span>
-                </label>
-                <label>
-                    <i class="fas fa-arrows-alt-h"></i> Gap ms
-                    <input type="range" id="gapSlider" min="0" max="100" value="0">
-                    <span class="val" id="gapVal">0</span>
-                </label>
-                <label>
-                    <i class="fas fa-clock"></i> Padding ms
-                    <input type="range" id="paddingSlider" min="0" max="300" value="80">
-                    <span class="val" id="paddingVal">80</span>
-                </label>
-                <span class="hint"><i class="fas fa-info-circle"></i> Bonyeza & buruta kuchagua</span>
-            </div>
-        </div>
-
-        <!-- ACTIONS -->
-        <div class="actions">
-            <button id="removeSelectedBtn" class="danger"><i class="fas fa-trash"></i> Remove Selected</button>
-            <button id="exportBtn" class="success"><i class="fas fa-download"></i> Pakua MP3</button>
-            <button id="exportWavBtn" class="success"><i class="fas fa-file-waveform"></i> Pakua WAV</button>
-            <button id="clearBtn" class="danger"><i class="fas fa-trash-alt"></i> Safisha</button>
-            <button id="resetBtn"><i class="fas fa-undo-alt"></i> Rudisha</button>
-        </div>
-
-        <!-- METRICS -->
-        <div class="metrics-box" id="metricsBox">
-            <div class="item"><div class="label">Awali</div><div class="value" id="metricOriginal">0s</div></div>
-            <div class="item"><div class="label">Iliyochakatwa</div><div class="value green" id="metricProcessed">0s</div></div>
-            <div class="item"><div class="label">Kimya Imeondolewa</div><div class="value red" id="metricRemoved">0s</div></div>
-            <div class="item"><div class="label">Asilimia</div><div class="value" id="metricPercent">0%</div></div>
-        </div>
-
-        <!-- INFO -->
-        <div class="info-bar">
-            <span><i class="fas fa-mouse-pointer"></i> Bonyeza & buruta kuchagua</span>
-            <span><i class="fas fa-magic"></i> AI VAD = inatambua sauti ya binadamu</span>
-            <span id="selectionStatus">Hakuna sehemu iliyochaguliwa</span>
-        </div>
+    <div class="info-bar">
+        <span>Rekodi → Ondoa Silence → Boost → Ongeza Picha/Text/Overlay → Pakua</span>
+        <span>Overlay & Text: Drag free | Scroll = kuza | Shift+Scroll = zungusha</span>
     </div>
+</div>
 
-    <script>
-        (function() {
-            // ================================================
-            // CORE VARIABLES
-            // ================================================
-            const canvas = document.getElementById('waveCanvas');
-            const ctx = canvas.getContext('2d');
-            const container = document.getElementById('wave-container');
-            const playhead = document.getElementById('playhead');
-            const selectionBox = document.getElementById('selectionBox');
-            const gapIndicator = document.getElementById('gapIndicator');
+<script>
+(function(){
+    const waveCanvas = document.getElementById('waveCanvas');
+    const wctx = waveCanvas.getContext('2d');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const pctx = previewCanvas.getContext('2d');
+    const container = document.getElementById('wave-container');
+    const playhead = document.getElementById('playhead');
+    const selectionRegion = document.getElementById('selectionRegion');
 
-            let originalBuffer = null;
-            let audioBuffer = null;
-            let audioCtx = null;
-            let source = null;
-            let isPlaying = false;
-            let startTime = 0;
-            let pauseOffset = 0;
-            let currentTime = 0;
-            let animId = null;
+    let audioCtx = null;
+    let originalBuffer = null;
+    let audioBuffer = null;
+    let source = null;
+    let isPlaying = false;
+    let startTime = 0;
+    let pauseOffset = 0;
+    let currentTime = 0;
+    let animId = null;
 
-            // Selection
-            let isSelecting = false;
-            let selStart = 0;
-            let selEnd = 0;
-            let selectedSegment = null;
-            let isMouseDown = false;
+    let images = [];
+    let overlay = {img: null, x: 0.75, y: 0.08, scale: 0.3}; // free position (0-1)
+    let textOverlays = [];
+    let selectedTextIdx = -1;
+    let isDraggingText = false;
+    let isDraggingOverlay = false;
+    let dragOffset = {x:0, y:0};
 
-            // Recording
-            let recordedChunks = [];
-            let mediaRecorder = null;
-            let stream = null;
-            let isRecording = false;
+    let isSelecting = false;
+    let selStartX = 0, selEndX = 0;
+    let selectedStartSample = 0, selectedEndSample = 0;
 
-            // Segments & gaps
-            let segments = [];
-            let gapsRemoved = false;
-            let originalSegments = [];
-            let metrics = {};
-            let isProcessing = false;
+    let isPreviewPlaying = false;
+    let previewAnimId = null;
+    let isRecording = false;
+    let recStartTime = 0;
+    let recTimerInterval = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let stream = null;
 
-            // ================================================
-            // INIT AUDIO CONTEXT
-            // ================================================
-            function initAudio() {
-                if (!audioCtx) {
-                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+    function initAudio(){
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return audioCtx;
+    }
+
+    // ================== SILENCE REMOVAL (High Quality) ==================
+    function aiRemoveSilence(buffer){
+        if(!buffer) return buffer;
+        const data = buffer.getChannelData(0);
+        const rate = buffer.sampleRate;
+
+        const dbVal = parseFloat(document.getElementById('thresholdSlider').value);
+        const threshold = Math.pow(10, -dbVal / 20);
+        const minSilenceMs = parseFloat(document.getElementById('minSilenceSlider').value);
+        const paddingMs = parseFloat(document.getElementById('paddingSlider').value);
+        const fadeMs = parseFloat(document.getElementById('fadeSlider').value);
+
+        const minSilenceSamples = Math.floor(minSilenceMs/1000 * rate);
+        const paddingSamples = Math.floor(paddingMs/1000 * rate);
+        const fadeSamples = Math.floor(fadeMs/1000 * rate);
+        const win = Math.floor(rate * 0.02);
+
+        let found = [];
+        let inSound = false, soundStart = 0, inSilence = false, silenceStart = 0;
+
+        for(let i=0; i<data.length; i+=Math.floor(win/2)){
+            const end = Math.min(i+win, data.length);
+            let sum=0;
+            for(let j=i;j<end;j++) sum += data[j]*data[j];
+            const energy = Math.sqrt(sum/(end-i));
+            const isSpeech = energy > threshold;
+
+            if(isSpeech && !inSound){
+                inSound = true;
+                soundStart = Math.max(0, i - paddingSamples);
+                inSilence = false;
+            } else if(!isSpeech && inSound && !inSilence){
+                inSilence = true;
+                silenceStart = i;
+            } else if(isSpeech && inSound && inSilence){
+                if(i - silenceStart >= minSilenceSamples){
+                    if(silenceStart - soundStart > Math.floor(rate*0.02)){
+                        found.push({start: soundStart, end: Math.min(data.length, silenceStart + paddingSamples)});
+                    }
+                    soundStart = Math.max(0, i - paddingSamples);
                 }
-                return audioCtx;
+                inSilence = false;
             }
-
-            // ================================================
-            // COUNTDOWN
-            // ================================================
-            function startCountdown(callback) {
-                const duration = 3; // fixed 3 seconds
-                let count = duration;
-                const overlay = document.getElementById('countdownOverlay');
-                const numberEl = document.getElementById('countdownNumber');
-                const labelEl = document.getElementById('countdownLabel');
-                const barEl = document.getElementById('countdownBar');
-
-                overlay.classList.add('active');
-
-                function update() {
-                    if (count > 0) {
-                        numberEl.textContent = count;
-                        numberEl.className = 'countdown-number';
-                        labelEl.textContent = count === 1 ? 'Sasa!' : 'Jitayarishe...';
-                        barEl.style.width = ((duration - count) / duration * 100) + '%';
-                        count--;
-                        setTimeout(update, 800);
-                    } else {
-                        numberEl.textContent = '🎤 START!';
-                        numberEl.className = 'countdown-number start';
-                        labelEl.textContent = 'Anza kuongea...';
-                        barEl.style.width = '100%';
-                        setTimeout(() => {
-                            overlay.classList.remove('active');
-                            if (callback) callback();
-                        }, 500);
-                    }
-                }
-                update();
+        }
+        if(inSound){
+            const endPos = inSilence ? silenceStart : data.length;
+            if(endPos - soundStart > Math.floor(rate*0.02)){
+                found.push({start: soundStart, end: Math.min(data.length, endPos)});
             }
+        }
+        if(found.length === 0) found.push({start:0, end:data.length});
 
-            // ================================================
-            // AI-POWERED SILENCE REMOVAL (Web Audio VAD)
-            // ================================================
-            function aiRemoveSilence(buffer) {
-                if (!buffer) return buffer;
-                const data = buffer.getChannelData(0);
-                const rate = buffer.sampleRate;
-                const threshold = parseFloat(document.getElementById('thresholdSlider').value) / 1000;
-                const gapMs = parseFloat(document.getElementById('gapSlider').value);
-                const gapSamples = Math.floor((gapMs / 1000) * rate);
-                const paddingMs = parseFloat(document.getElementById('paddingSlider').value);
-                const paddingSamples = Math.floor((paddingMs / 1000) * rate);
-                const minSilenceMs = 30;
-                const minSilenceSamples = Math.floor((minSilenceMs / 1000) * rate);
-                const minSeg = Math.floor(rate * 0.015);
+        found.sort((a,b)=>a.start-b.start);
+        let merged = [found[0]];
+        for(let i=1;i<found.length;i++){
+            if(found[i].start <= merged[merged.length-1].end + Math.floor(rate*0.04)){
+                merged[merged.length-1].end = Math.max(merged[merged.length-1].end, found[i].end);
+            } else merged.push(found[i]);
+        }
 
-                console.log('🧠 AI VAD Processing...');
-                console.log('Threshold:', threshold, 'Padding:', paddingMs, 'ms');
+        let newData = [];
+        merged.forEach((seg, idx)=>{
+            let segData = data.slice(seg.start, seg.end);
+            const fi = Math.min(fadeSamples, segData.length);
+            for(let i=0;i<fi;i++) segData[i] *= (i/fi);
+            const fo = Math.min(fadeSamples, segData.length);
+            for(let i=0;i<fo;i++) segData[segData.length-1-i] *= (i/fo);
 
-                // === VAD: Energy + Zero Crossing Rate (simulated AI) ===
-                // For true AI, we'd use Silero VAD via ONNX/WebAssembly
-                // This is a production-grade hybrid: Energy + ZCR + Speech pattern detection
-
-                let found = [];
-                let inSound = false;
-                let soundStart = 0;
-                let inSilence = false;
-                let silenceStart = 0;
-                let speechConfidence = 0;
-
-                // Window size for analysis
-                const windowSize = Math.floor(rate * 0.025); // 25ms
-
-                for (let i = 0; i < data.length; i += Math.floor(windowSize / 2)) {
-                    const end = Math.min(i + windowSize, data.length);
-                    const frame = data.slice(i, end);
-
-                    // Energy
-                    const energy = Math.sqrt(frame.reduce((s, v) => s + v * v, 0) / frame.length);
-
-                    // Zero Crossing Rate (ZCR) - helps distinguish speech from noise
-                    let zcr = 0;
-                    for (let j = 1; j < frame.length; j++) {
-                        if ((frame[j] > 0 && frame[j - 1] < 0) || (frame[j] < 0 && frame[j - 1] > 0)) {
-                            zcr++;
-                        }
-                    }
-                    zcr = zcr / frame.length;
-
-                    // Speech detection: energy above threshold AND ZCR in speech range (0.1 - 0.5)
-                    const isSpeech = energy > threshold && zcr > 0.05 && zcr < 0.6;
-
-                    // Additional check: speech usually has higher energy in 300Hz-3kHz range
-                    // We simulate this with a simple pattern check
-                    let speechPattern = 0;
-                    if (frame.length > 100) {
-                        const mid = Math.floor(frame.length / 2);
-                        const firstHalf = frame.slice(0, mid);
-                        const secondHalf = frame.slice(mid);
-                        const e1 = Math.sqrt(firstHalf.reduce((s, v) => s + v * v, 0) / firstHalf.length);
-                        const e2 = Math.sqrt(secondHalf.reduce((s, v) => s + v * v, 0) / secondHalf.length);
-                        // Speech often has varying energy within a window
-                        speechPattern = Math.abs(e1 - e2) / (Math.max(e1, e2) + 0.001);
-                    }
-
-                    const finalSpeech = isSpeech || (energy > threshold * 0.7 && speechPattern > 0.1);
-
-                    if (finalSpeech && !inSound) {
-                        inSound = true;
-                        soundStart = Math.max(0, i - paddingSamples);
-                        inSilence = false;
-                    } else if (!finalSpeech && inSound && !inSilence) {
-                        inSilence = true;
-                        silenceStart = i;
-                    } else if (finalSpeech && inSound && inSilence) {
-                        const silenceLen = i - silenceStart;
-                        if (silenceLen >= minSilenceSamples) {
-                            if (silenceStart - soundStart > minSeg) {
-                                const segEnd = Math.min(data.length, silenceStart + paddingSamples);
-                                found.push({ start: soundStart, end: segEnd });
-                            }
-                            soundStart = Math.max(0, i - paddingSamples);
-                        }
-                        inSilence = false;
-                    }
+            if(idx===0){
+                for(let i=0;i<segData.length;i++) newData.push(segData[i]);
+            } else {
+                const cf = Math.min(fadeSamples, segData.length, newData.length);
+                for(let i=0;i<cf;i++){
+                    const t = i/cf;
+                    newData[newData.length-cf+i] = newData[newData.length-cf+i]*(1-t) + segData[i]*t;
                 }
-
-                if (inSound) {
-                    const endPos = inSilence ? silenceStart : data.length;
-                    if (endPos - soundStart > minSeg) {
-                        found.push({ start: soundStart, end: Math.min(data.length, endPos + paddingSamples) });
-                    }
-                }
-
-                // Fallback: if no segments found, use aggressive threshold
-                if (found.length === 0) {
-                    console.log('⚠️ No segments found, using aggressive detection...');
-                    const lowThresh = threshold * 0.3;
-                    inSound = false;
-                    soundStart = 0;
-                    for (let i = 0; i < data.length; i += Math.floor(windowSize / 2)) {
-                        const end = Math.min(i + windowSize, data.length);
-                        const frame = data.slice(i, end);
-                        const energy = Math.sqrt(frame.reduce((s, v) => s + v * v, 0) / frame.length);
-                        if (energy > lowThresh && !inSound) {
-                            inSound = true;
-                            soundStart = Math.max(0, i - paddingSamples);
-                        } else if (energy <= lowThresh && inSound) {
-                            inSound = false;
-                            if (i - soundStart > minSeg) {
-                                found.push({ start: soundStart, end: Math.min(data.length, i + paddingSamples) });
-                            }
-                        }
-                    }
-                    if (inSound && data.length - soundStart > minSeg) {
-                        found.push({ start: soundStart, end: data.length });
-                    }
-                }
-
-                // Merge overlapping segments
-                if (found.length > 1) {
-                    found.sort((a, b) => a.start - b.start);
-                    let merged = [found[0]];
-                    for (let i = 1; i < found.length; i++) {
-                        if (found[i].start <= merged[merged.length - 1].end) {
-                            merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, found[i].end);
-                        } else {
-                            merged.push(found[i]);
-                        }
-                    }
-                    found = merged;
-                }
-
-                // If STILL no segments, use whole audio
-                if (found.length === 0) {
-                    found.push({ start: 0, end: data.length });
-                }
-
-                console.log('✅ Found', found.length, 'speech segments');
-
-                // Store for visual display
-                originalSegments = found.map(s => ({ ...s }));
-
-                // Build new audio
-                let newData = [];
-                let totalSilence = 0;
-                found.forEach((seg, idx) => {
-                    for (let i = seg.start; i < seg.end; i++) {
-                        newData.push(data[i]);
-                    }
-                    if (idx < found.length - 1) {
-                        const silenceLen = found[idx + 1].start - seg.end;
-                        totalSilence += silenceLen;
-                        for (let i = 0; i < gapSamples; i++) {
-                            newData.push(0);
-                        }
-                    }
-                });
-
-                if (newData.length === 0) return buffer;
-
-                const nb = audioCtx.createBuffer(1, newData.length, rate);
-                nb.copyToChannel(new Float32Array(newData), 0);
-
-                // Metrics
-                const origDur = data.length / rate;
-                const procDur = newData.length / rate;
-                metrics = {
-                    original: origDur,
-                    processed: procDur,
-                    removed: origDur - procDur,
-                    removedPercent: ((origDur - procDur) / origDur * 100),
-                    segments: found.length
-                };
-
-                segments = [{ start: 0, end: nb.length }];
-                gapsRemoved = true;
-
-                // Show metrics
-                document.getElementById('metricOriginal').textContent = origDur.toFixed(2) + 's';
-                document.getElementById('metricProcessed').textContent = procDur.toFixed(2) + 's';
-                document.getElementById('metricRemoved').textContent = (origDur - procDur).toFixed(2) + 's';
-                document.getElementById('metricPercent').textContent = ((origDur - procDur) / origDur * 100).toFixed(1) +
-                '%';
-                document.getElementById('metricsBox').classList.add('active');
-
-                return nb;
+                for(let i=cf;i<segData.length;i++) newData.push(segData[i]);
             }
+        });
 
-            // ================================================
-            // LOAD AUDIO
-            // ================================================
-            function loadAudio(buffer, resetSegments = true, storeOriginal = true) {
-                if (storeOriginal) originalBuffer = buffer;
-                audioBuffer = buffer;
-                if (resetSegments) segments = buffer ? [{ start: 0, end: buffer.length }] : [];
-                renderWaveform(buffer);
-                updateTimeDisplay();
-                document.getElementById('statusDisplay').innerHTML =
-                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Imepakiwa`;
-                pauseOffset = 0;
-                currentTime = 0;
-                if (isPlaying) stopPlayback();
-                document.getElementById('segmentInfo').textContent = `Sehemu: ${segments.length}`;
-                updateSelectionStatus();
-            }
+        if(newData.length < 100) return buffer;
+        const nb = audioCtx.createBuffer(1, newData.length, rate);
+        nb.copyToChannel(new Float32Array(newData), 0);
 
-            // ================================================
-            // RENDER WAVEFORM
-            // ================================================
-            function renderWaveform(buffer) {
-                if (!buffer) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    return;
+        const origDur = data.length/rate;
+        const procDur = newData.length/rate;
+        document.getElementById('metricOriginal').textContent = origDur.toFixed(2)+'s';
+        document.getElementById('metricProcessed').textContent = procDur.toFixed(2)+'s';
+        document.getElementById('metricRemoved').textContent = (origDur-procDur).toFixed(2)+'s';
+        document.getElementById('metricPercent').textContent = ((origDur-procDur)/origDur*100).toFixed(1)+'%';
+        document.getElementById('metricsBox').classList.add('active');
+        return nb;
+    }
+
+    function applyStudioBoost(buffer){
+        if(!buffer) return buffer;
+        const data = buffer.getChannelData(0);
+        const boost = parseFloat(document.getElementById('boostSlider').value)/100;
+        const len = data.length;
+        let out = new Float32Array(len);
+        let prev=0, peak=0;
+        const hp=0.975;
+        for(let i=0;i<len;i++){
+            const filtered = hp*(prev + data[i] - (i>0?data[i-1]:0));
+            prev = filtered;
+            let s = filtered * boost;
+            if(Math.abs(s)>0.48) s = Math.sign(s)*(0.48+(Math.abs(s)-0.48)*0.28);
+            out[i]=s;
+            if(Math.abs(s)>peak) peak=Math.abs(s);
+        }
+        if(peak>0.01){
+            const norm=0.87/peak;
+            for(let i=0;i<len;i++) out[i]=Math.max(-0.95,Math.min(0.95,out[i]*norm));
+        }
+        const nb=audioCtx.createBuffer(1,len,buffer.sampleRate);
+        nb.copyToChannel(out,0);
+        return nb;
+    }
+
+    function deleteSelectedRegion(){
+        if(!audioBuffer || selectedEndSample<=selectedStartSample) return alert('Chagua sehemu kwanza');
+        const data=audioBuffer.getChannelData(0);
+        const rate=audioBuffer.sampleRate;
+        const fade=Math.floor(0.015*rate);
+        let newData=[];
+        for(let i=0;i<selectedStartSample;i++) newData.push(data[i]);
+        const afterStart=selectedEndSample;
+        const cf=Math.min(fade,newData.length,data.length-afterStart);
+        for(let i=0;i<cf;i++){
+            const t=i/cf;
+            newData[newData.length-cf+i] = (newData[newData.length-cf+i]||0)*(1-t) + (data[afterStart+i]||0)*t;
+        }
+        for(let i=cf;i<data.length-afterStart;i++) newData.push(data[afterStart+i]);
+        if(newData.length<100) return;
+        const nb=audioCtx.createBuffer(1,newData.length,rate);
+        nb.copyToChannel(new Float32Array(newData),0);
+        loadAudio(nb,false);
+        clearSelection();
+        document.getElementById('statusDisplay').textContent='Sehemu imefutwa';
+    }
+
+    function clearSelection(){
+        selectionRegion.style.display='none';
+        selectedStartSample=0;
+        selectedEndSample=0;
+    }
+
+    function loadAudio(buffer, storeOriginal=true){
+        if(storeOriginal) originalBuffer=buffer;
+        audioBuffer=buffer;
+        renderWaveform(buffer);
+        updateTimeDisplay();
+        document.getElementById('statusDisplay').textContent='Imepakiwa';
+        pauseOffset=0; currentTime=0;
+        if(isPlaying) stopPlayback();
+        clearSelection();
+    }
+
+    function renderWaveform(buffer){
+        if(!buffer) return;
+        const data=buffer.getChannelData(0);
+        const step=Math.max(1,Math.floor(data.length/waveCanvas.width));
+        wctx.clearRect(0,0,waveCanvas.width,waveCanvas.height);
+        wctx.fillStyle='#020617';
+        wctx.fillRect(0,0,waveCanvas.width,waveCanvas.height);
+        wctx.beginPath();
+        wctx.strokeStyle='#60a5fa';
+        wctx.lineWidth=1.5;
+        for(let i=0;i<waveCanvas.width;i++){
+            let min=1,max=-1;
+            for(let j=0;j<step;j++){
+                const idx=i*step+j;
+                if(idx<data.length){
+                    const v=data[idx];
+                    if(v<min)min=v; if(v>max)max=v;
                 }
-                const data = buffer.getChannelData(0);
-                const step = Math.max(1, Math.floor(data.length / canvas.width));
-                const amp = 0.9;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#0c1119';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw removed gaps in RED
-                if (gapsRemoved && originalSegments.length > 1 && originalBuffer) {
-                    const orig = originalBuffer.getChannelData(0);
-                    for (let i = 1; i < originalSegments.length; i++) {
-                        const gs = originalSegments[i - 1].end;
-                        const ge = originalSegments[i].start;
-                        if (ge > gs) {
-                            const x1 = (gs / orig.length) * canvas.width;
-                            const x2 = (ge / orig.length) * canvas.width;
-                            ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-                            ctx.fillRect(x1, 0, x2 - x1, canvas.height);
-                            ctx.fillStyle = 'rgba(255, 80, 80, 0.6)';
-                            ctx.font = '9px Arial';
-                            ctx.textAlign = 'center';
-                            ctx.fillText('✕ KIMYA', (x1 + x2) / 2, canvas.height / 2 + 2);
-                            // Cross pattern
-                            ctx.strokeStyle = 'rgba(255,50,50,0.2)';
-                            ctx.lineWidth = 1;
-                            ctx.setLineDash([3, 5]);
-                            ctx.beginPath();
-                            ctx.moveTo(x1, 0);
-                            ctx.lineTo(x2, canvas.height);
-                            ctx.stroke();
-                            ctx.beginPath();
-                            ctx.moveTo(x2, 0);
-                            ctx.lineTo(x1, canvas.height);
-                            ctx.stroke();
-                            ctx.setLineDash([]);
-                        }
-                    }
-                }
-
-                // Draw segments
-                if (segments.length > 1) {
-                    segments.forEach(seg => {
-                        const x1 = (seg.start / data.length) * canvas.width;
-                        const x2 = (seg.end / data.length) * canvas.width;
-                        ctx.fillStyle = 'rgba(255,187,94,0.07)';
-                        ctx.fillRect(x1, 0, x2 - x1, canvas.height);
-                        ctx.strokeStyle = 'rgba(255,187,94,0.15)';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(x1, 0, x2 - x1, canvas.height);
-                    });
-                }
-
-                // Waveform
-                ctx.beginPath();
-                ctx.strokeStyle = '#6c8cff';
-                ctx.lineWidth = 1.8;
-                for (let i = 0; i < canvas.width; i++) {
-                    let min = 1,
-                        max = -1;
-                    for (let j = 0; j < step; j++) {
-                        const idx = i * step + j;
-                        if (idx < data.length) {
-                            const v = data[idx];
-                            if (v < min) min = v;
-                            if (v > max) max = v;
-                        }
-                    }
-                    ctx.moveTo(i, canvas.height / 2 - (max * amp * canvas.height / 2));
-                    ctx.lineTo(i, canvas.height / 2 - (min * amp * canvas.height / 2));
-                }
-                ctx.stroke();
-
-                document.getElementById('segmentInfo').textContent = `Sehemu: ${segments.length}`;
             }
+            wctx.moveTo(i,waveCanvas.height/2-max*0.8*waveCanvas.height/2);
+            wctx.lineTo(i,waveCanvas.height/2-min*0.8*waveCanvas.height/2);
+        }
+        wctx.stroke();
+    }
 
-            // ================================================
-            // PLAYBACK
-            // ================================================
-            function playAudio() {
-                if (!audioBuffer) return;
-                initAudio();
-                if (isPlaying) return;
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+    function playAudio(){
+        if(!audioBuffer) return;
+        initAudio();
+        if(isPlaying) return;
+        if(audioCtx.state==='suspended') audioCtx.resume();
+        source=audioCtx.createBufferSource();
+        source.buffer=audioBuffer;
+        source.connect(audioCtx.destination);
+        source.start(0,pauseOffset);
+        startTime=audioCtx.currentTime-pauseOffset;
+        isPlaying=true;
+        document.getElementById('playBtn').innerHTML='<i class="fas fa-pause"></i>';
+        updatePlayhead();
+    }
+    function pausePlayback(){
+        if(!isPlaying) return;
+        source.stop();
+        isPlaying=false;
+        pauseOffset=audioCtx.currentTime-startTime;
+        cancelAnimationFrame(animId);
+        document.getElementById('playBtn').innerHTML='<i class="fas fa-play"></i>';
+    }
+    function stopPlayback(){
+        if(source) try{source.stop()}catch(e){}
+        isPlaying=false; pauseOffset=0; currentTime=0;
+        cancelAnimationFrame(animId);
+        playhead.style.left='0%';
+        updateTimeDisplay();
+        document.getElementById('playBtn').innerHTML='<i class="fas fa-play"></i>';
+    }
+    function updatePlayhead(){
+        if(!isPlaying) return;
+        currentTime=Math.min(audioCtx.currentTime-startTime,audioBuffer.duration);
+        playhead.style.left=(currentTime/audioBuffer.duration*100)+'%';
+        updateTimeDisplay();
+        if(currentTime>=audioBuffer.duration){stopPlayback();return}
+        animId=requestAnimationFrame(updatePlayhead);
+    }
+    function updateTimeDisplay(){
+        const dur=audioBuffer?audioBuffer.duration:0;
+        document.getElementById('timeDisplay').textContent=`${formatTime(Math.min(currentTime,dur))} / ${formatTime(dur)}`;
+    }
+    function formatTime(t){
+        const m=Math.floor(t/60),s=Math.floor(t%60);
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
 
-                source = audioCtx.createBufferSource();
-                source.buffer = audioBuffer;
-                const gain = audioCtx.createGain();
-                gain.gain.value = 1.0;
-                source.connect(gain);
-                gain.connect(audioCtx.destination);
-                source.start(0, pauseOffset);
-                startTime = audioCtx.currentTime - pauseOffset;
-                isPlaying = true;
-                document.getElementById('playBtn').innerHTML = '<i class="fas fa-pause"></i> Cheza';
-                updatePlayhead();
-            }
-
-            function pausePlayback() {
-                if (!isPlaying || !audioCtx) return;
-                source.stop();
-                isPlaying = false;
-                pauseOffset = audioCtx.currentTime - startTime;
-                if (pauseOffset < 0) pauseOffset = 0;
-                currentTime = pauseOffset;
-                cancelAnimationFrame(animId);
-                updateTimeDisplay();
-                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i> Cheza';
-            }
-
-            function stopPlayback() {
-                if (source) { try { source.stop(); } catch (e) {} }
-                isPlaying = false;
-                pauseOffset = 0;
-                currentTime = 0;
-                cancelAnimationFrame(animId);
-                playhead.style.left = '0%';
-                updateTimeDisplay();
-                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i> Cheza';
-            }
-
-            function updatePlayhead() {
-                if (!isPlaying) return;
-                const elapsed = audioCtx.currentTime - startTime;
-                const duration = audioBuffer.duration;
-                currentTime = Math.min(elapsed, duration);
-                playhead.style.left = (currentTime / duration * 100) + '%';
-                updateTimeDisplay();
-                if (currentTime >= duration) {
-                    stopPlayback();
-                    return;
-                }
-                animId = requestAnimationFrame(updatePlayhead);
-            }
-
-            function updateTimeDisplay() {
-                const dur = audioBuffer ? audioBuffer.duration : 0;
-                const cur = Math.min(currentTime, dur);
-                document.getElementById('timeDisplay').textContent =
-                    `${formatTime(cur)} / ${formatTime(dur)}`;
-            }
-
-            function formatTime(t) {
-                const m = Math.floor(t / 60);
-                const s = Math.floor(t % 60);
-                return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            }
-
-            // ================================================
-            // RECORDING
-            // ================================================
-            async function startRecording() {
-                if (isRecording) return;
-                if (isProcessing) {
-                    alert('Tafadhali subiri processing ikamilike.');
-                    return;
-                }
-
-                // Countdown first
-                startCountdown(async () => {
-                    try {
-                        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        mediaRecorder = new MediaRecorder(stream);
-                        recordedChunks = [];
-                        mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                        mediaRecorder.onstop = () => {
-                            const blob = new Blob(recordedChunks, { type: 'audio/wav' });
-                            const reader = new FileReader();
-                            reader.onload = async (ev) => {
-                                const ab = ev.target.result;
+    // Recording
+    async function startRecording(){
+        if(isRecording) return;
+        let count=3;
+        const overlayEl=document.getElementById('countdownOverlay');
+        const num=document.getElementById('countdownNumber');
+        overlayEl.classList.add('active');
+        function tick(){
+            if(count>0){num.textContent=count;num.className='countdown-number';count--;setTimeout(tick,650)}
+            else{
+                num.textContent='START';num.className='countdown-number start';
+                setTimeout(async()=>{
+                    overlayEl.classList.remove('active');
+                    try{
+                        stream=await navigator.mediaDevices.getUserMedia({audio:true});
+                        mediaRecorder=new MediaRecorder(stream);
+                        recordedChunks=[];
+                        mediaRecorder.ondataavailable=e=>recordedChunks.push(e.data);
+                        mediaRecorder.onstop=()=>{
+                            const blob=new Blob(recordedChunks,{type:'audio/webm'});
+                            const reader=new FileReader();
+                            reader.onload=async ev=>{
                                 initAudio();
-                                const buf = await audioCtx.decodeAudioData(ab);
-                                gapsRemoved = false;
-                                originalSegments = [];
-                                loadAudio(buf);
-                                document.getElementById('statusDisplay').innerHTML =
-                                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Imerekodiwa`;
-                                isRecording = false;
-                                document.getElementById('recordBtn').style.background = '#4a6cf7';
+                                loadAudio(await audioCtx.decodeAudioData(ev.target.result));
+                                document.getElementById('statusDisplay').textContent='Imerekodiwa';
                             };
                             reader.readAsArrayBuffer(blob);
+                            clearInterval(recTimerInterval);
+                            document.getElementById('recTimer').classList.remove('active');
                         };
                         mediaRecorder.start();
-                        isRecording = true;
-                        document.getElementById('statusDisplay').innerHTML =
-                            `<i class="fas fa-circle" style="color:#ff5e5e;"></i> Inarekodi...`;
-                        document.getElementById('recordBtn').style.background = '#c44';
-                    } catch (e) {
-                        alert('Hitilafu: Ruhusu kipaza sauti.');
-                        isRecording = false;
-                    }
-                });
+                        isRecording=true;
+                        recStartTime=Date.now();
+                        document.getElementById('recTimer').classList.add('active');
+                        recTimerInterval=setInterval(()=>{
+                            const e=(Date.now()-recStartTime)/1000;
+                            document.getElementById('recTimer').textContent=`${String(Math.floor(e/60)).padStart(2,'0')}:${String(Math.floor(e%60)).padStart(2,'0')}`;
+                        },200);
+                        document.getElementById('statusDisplay').textContent='Inarekodi...';
+                        document.getElementById('recordBtn').style.background='#dc2626';
+                    }catch(e){alert('Ruhusu microphone')}
+                },350);
             }
+        }
+        tick();
+    }
+    function stopRecording(){
+        if(mediaRecorder&&mediaRecorder.state==='recording'){
+            mediaRecorder.stop();
+            stream.getTracks().forEach(t=>t.stop());
+            isRecording=false;
+            document.getElementById('recordBtn').style.background='#3b82f6';
+        }
+    }
 
-            function stopRecording() {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                    stream.getTracks().forEach(t => t.stop());
-                    document.getElementById('recordBtn').style.background = '#4a6cf7';
-                    isRecording = false;
-                }
+    // Images
+    function addImages(files){
+        Array.from(files).forEach(file=>{
+            const img=new Image();
+            img.onload=()=>{images.push({img,name:file.name});renderImageList();drawPreviewFrame(0)};
+            img.src=URL.createObjectURL(file);
+        });
+    }
+    function renderImageList(){
+        const list=document.getElementById('imageList');
+        list.innerHTML='';
+        images.forEach((item,i)=>{
+            const wrap=document.createElement('div');
+            wrap.className='thumb-wrap';
+            const thumb=document.createElement('img');
+            thumb.src=item.img.src;
+            thumb.className='image-thumb';
+            const del=document.createElement('div');
+            del.className='thumb-del';
+            del.innerHTML='×';
+            del.onclick=e=>{e.stopPropagation();images.splice(i,1);renderImageList();drawPreviewFrame(0)};
+            wrap.appendChild(thumb);wrap.appendChild(del);
+            list.appendChild(wrap);
+        });
+    }
+
+    function addText(){
+        const text=document.getElementById('textInput').value.trim();
+        if(!text) return;
+        textOverlays.push({
+            text,
+            font:document.getElementById('textFont').value,
+            size:parseInt(document.getElementById('textSize').value)||56,
+            color:document.getElementById('textColor').value,
+            bg:document.getElementById('textBg').value,
+            bgEnable:document.getElementById('textBgEnable').checked,
+            bold:document.getElementById('textBold').checked,
+            x:previewCanvas.width/2,
+            y:previewCanvas.height*0.78,
+            scale:1,
+            rotation:0
+        });
+        selectedTextIdx=textOverlays.length-1;
+        drawPreviewFrame(0);
+    }
+
+    function updateCanvasSize(){
+        const res=parseInt(document.getElementById('resSelect').value);
+        const aspect=document.getElementById('aspectSelect').value;
+        let w,h;
+        if(aspect==='16:9'){w=res===1080?1920:res===720?1280:854;h=res}
+        else if(aspect==='9:16'){h=res===1080?1920:res===720?1280:854;w=res}
+        else{w=h=res}
+        previewCanvas.width=w;
+        previewCanvas.height=h;
+        document.getElementById('previewRes').textContent=`${w}×${h}`;
+        drawPreviewFrame(currentTime||0);
+    }
+
+    function drawPreviewFrame(time){
+        const w=previewCanvas.width, h=previewCanvas.height;
+        pctx.fillStyle='#000';
+        pctx.fillRect(0,0,w,h);
+
+        // Background images
+        if(images.length){
+            const idx=Math.min(images.length-1, Math.floor((time/(audioBuffer?audioBuffer.duration:8))*images.length));
+            const imgObj=images[idx].img;
+            const effect=document.getElementById('imageEffect').value;
+            const scale=Math.max(w/imgObj.width,h/imgObj.height);
+            let iw=imgObj.width*scale, ih=imgObj.height*scale;
+            let ix=(w-iw)/2, iy=(h-ih)/2;
+            const localTime=(time%4)/4;
+
+            pctx.save();
+            if(effect==='zoom'){
+                const z=1+localTime*0.13;
+                pctx.translate(w/2,h/2);pctx.scale(z,z);pctx.translate(-w/2,-h/2);
+            }else if(effect==='kenburns'){
+                const z=1+localTime*0.1;
+                pctx.translate(w/2+(localTime-0.5)*30,h/2);pctx.scale(z,z);pctx.translate(-w/2,-h/2);
+            }else if(effect==='vibrant'){
+                pctx.filter='contrast(1.12) saturate(1.25) brightness(1.04)';
             }
+            if(effect==='fade') pctx.globalAlpha=0.35+localTime*0.65;
+            pctx.drawImage(imgObj,ix,iy,iw,ih);
+            pctx.restore();
+            pctx.filter='none';pctx.globalAlpha=1;
+        }
 
-            // ================================================
-            // SELECTION (Click & Drag)
-            // ================================================
-            function getSampleFromPct(pct) {
-                if (!audioBuffer) return 0;
-                return Math.floor((pct / 100) * audioBuffer.length);
+        // Free Overlay
+        if(overlay.img){
+            const sizePct=parseFloat(document.getElementById('overlaySize').value)/100;
+            const ow=w*sizePct;
+            const oh=overlay.img.height*(ow/overlay.img.width);
+            const ox=overlay.x*w - ow/2;
+            const oy=overlay.y*h - oh/2;
+            pctx.drawImage(overlay.img, ox, oy, ow, oh);
+        }
+
+        // Free Text
+        textOverlays.forEach(t=>{
+            pctx.save();
+            pctx.translate(t.x,t.y);
+            pctx.rotate(t.rotation||0);
+            pctx.scale(t.scale,t.scale);
+            const weight=t.bold?'bold':'normal';
+            pctx.font=`${weight} ${t.size}px ${t.font}`;
+            pctx.textAlign='center';
+            pctx.textBaseline='middle';
+            if(t.bgEnable){
+                const m=pctx.measureText(t.text);
+                pctx.fillStyle=t.bg;
+                pctx.globalAlpha=0.7;
+                pctx.fillRect(-m.width/2-11,-t.size/2-7,m.width+22,t.size+14);
+                pctx.globalAlpha=1;
             }
+            pctx.shadowColor='rgba(0,0,0,0.6)';
+            pctx.shadowBlur=5;
+            pctx.shadowOffsetX=1;pctx.shadowOffsetY=2;
+            pctx.fillStyle=t.color;
+            pctx.fillText(t.text,0,0);
+            pctx.restore();
+        });
+    }
 
-            function updateSelectionDisplay() {
-                if (!selectedSegment || !audioBuffer) {
-                    selectionBox.style.display = 'none';
-                    document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
-                    return;
-                }
-                const sp = (selectedSegment.start / audioBuffer.length) * 100;
-                const ep = (selectedSegment.end / audioBuffer.length) * 100;
-                selectionBox.style.display = 'block';
-                selectionBox.style.left = Math.min(sp, ep) + '%';
-                selectionBox.style.width = Math.abs(ep - sp) + '%';
-                const dur = (selectedSegment.end - selectedSegment.start) / audioBuffer.sampleRate;
-                document.getElementById('selectionStatus').textContent = `✅ Sehemu: ${(dur * 1000).toFixed(0)}ms`;
+    function startPreview(){
+        if(!audioBuffer&&!images.length) return alert('Ongeza content');
+        isPreviewPlaying=true;
+        const start=performance.now();
+        const duration=audioBuffer?audioBuffer.duration:8;
+        if(audioBuffer){stopPlayback();pauseOffset=0;playAudio()}
+        function loop(now){
+            if(!isPreviewPlaying) return;
+            const t=(now-start)/1000;
+            if(t>duration){isPreviewPlaying=false;stopPlayback();return}
+            drawPreviewFrame(t);
+            previewAnimId=requestAnimationFrame(loop);
+        }
+        previewAnimId=requestAnimationFrame(loop);
+    }
+    function stopPreview(){
+        isPreviewPlaying=false;
+        cancelAnimationFrame(previewAnimId);
+        stopPlayback();
+    }
+
+    async function exportVideo(){
+        if(!audioBuffer&&!images.length) return alert('Hakuna content');
+        updateCanvasSize();
+        const duration=audioBuffer?audioBuffer.duration:6;
+        document.getElementById('statusDisplay').textContent='Inarekodi video...';
+        const canvasStream=previewCanvas.captureStream(30);
+        let combined=canvasStream;
+        if(audioBuffer){
+            const dest=audioCtx.createMediaStreamDestination();
+            const src=audioCtx.createBufferSource();
+            src.buffer=audioBuffer;
+            src.connect(dest);
+            src.start(0);
+            combined=new MediaStream([...canvasStream.getVideoTracks(),...dest.stream.getAudioTracks()]);
+        }
+        const recorder=new MediaRecorder(combined,{mimeType:'video/webm;codecs=vp9'});
+        const chunks=[];
+        recorder.ondataavailable=e=>chunks.push(e.data);
+        recorder.onstop=()=>{
+            const a=document.createElement('a');
+            a.href=URL.createObjectURL(new Blob(chunks,{type:'video/webm'}));
+            a.download=`ai_studio_${Date.now()}.webm`;
+            a.click();
+            document.getElementById('statusDisplay').textContent='Video imepakuliwa';
+            stopPreview();
+        };
+        recorder.start();
+        startPreview();
+        setTimeout(()=>{recorder.stop();combined.getTracks().forEach(t=>t.stop())},(duration+0.4)*1000);
+    }
+
+    function exportWav(){
+        if(!audioBuffer) return alert('Hakuna audio');
+        const data=audioBuffer.getChannelData(0);
+        const buf=new ArrayBuffer(44+data.length*2);
+        const v=new DataView(buf);
+        const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+        ws(0,'RIFF');v.setUint32(4,36+data.length*2,true);ws(8,'WAVE');
+        ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+        v.setUint32(24,audioBuffer.sampleRate,true);v.setUint32(28,audioBuffer.sampleRate*2,true);
+        v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,data.length*2,true);
+        for(let i=0;i<data.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,data[i]))*0x7FFF,true);
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+        a.download=`voice_${Date.now()}.wav`;
+        a.click();
+    }
+
+    function exportMp3(){
+        // Browser limited - we export WAV and rename for simplicity
+        exportWav();
+        alert('Browser haitoi MP3 moja kwa moja. WAV imepakuliwa (unaweza kubadilisha jina kuwa .mp3 au ubadilishe kwa converter).');
+    }
+
+    // Events
+    document.getElementById('thresholdSlider').oninput=function(){document.getElementById('thresholdVal').textContent='-'+this.value+'dB'};
+    document.getElementById('minSilenceSlider').oninput=function(){document.getElementById('minSilenceVal').textContent=this.value+'ms'};
+    document.getElementById('paddingSlider').oninput=function(){document.getElementById('paddingVal').textContent=this.value+'ms'};
+    document.getElementById('fadeSlider').oninput=function(){document.getElementById('fadeVal').textContent=this.value+'ms'};
+    document.getElementById('boostSlider').oninput=function(){document.getElementById('boostVal').textContent=this.value+'%'};
+
+    document.getElementById('recordBtn').onclick=()=>isRecording?stopRecording():startRecording();
+    document.getElementById('stopBtn').onclick=stopRecording;
+    document.getElementById('playBtn').onclick=()=>isPlaying?pausePlayback():playAudio();
+    document.getElementById('pauseBtn').onclick=pausePlayback;
+    document.getElementById('deleteRegionBtn').onclick=deleteSelectedRegion;
+
+    document.getElementById('uploadAudioBtn').onclick=()=>document.getElementById('audioInput').click();
+    document.getElementById('audioInput').onchange=async e=>{
+        const f=e.target.files[0];if(!f)return;
+        initAudio();
+        loadAudio(await audioCtx.decodeAudioData(await f.arrayBuffer()));
+    };
+
+    document.getElementById('uploadImageBtn').onclick=()=>document.getElementById('imageInput').click();
+    document.getElementById('addImageBtn').onclick=()=>document.getElementById('imageInput').click();
+    document.getElementById('imageInput').onchange=e=>addImages(e.target.files);
+    document.getElementById('clearImagesBtn').onclick=()=>{images=[];renderImageList();drawPreviewFrame(0)};
+
+    document.getElementById('uploadOverlayBtn').onclick=()=>document.getElementById('overlayInput').click();
+    document.getElementById('overlayInput').onchange=e=>{
+        const f=e.target.files[0];if(!f)return;
+        const img=new Image();
+        img.onload=()=>{overlay.img=img;overlay.x=0.78;overlay.y=0.12;drawPreviewFrame(0)};
+        img.src=URL.createObjectURL(f);
+    };
+
+    document.getElementById('autoRemoveBtn').onclick=()=>{
+        if(!originalBuffer) return alert('Rekodi au weka audio kwanza');
+        document.getElementById('autoRemoveBtn').innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        setTimeout(()=>{
+            const result=aiRemoveSilence(originalBuffer);
+            loadAudio(result,false);
+            document.getElementById('autoRemoveBtn').innerHTML='<i class="fas fa-magic"></i> Ondoa Silence';
+            document.getElementById('statusDisplay').textContent='Silence imeondolewa + crossfade';
+        },30);
+    };
+
+    document.getElementById('enhanceBtn').onclick=()=>{
+        if(!audioBuffer) return alert('Hakuna audio');
+        loadAudio(applyStudioBoost(audioBuffer),false);
+        document.getElementById('statusDisplay').textContent='Studio Boost imetumika';
+    };
+
+    document.getElementById('addTextBtn').onclick=addText;
+    document.getElementById('clearTextBtn').onclick=()=>{textOverlays=[];selectedTextIdx=-1;drawPreviewFrame(0)};
+
+    document.getElementById('playPreviewBtn').onclick=startPreview;
+    document.getElementById('stopPreviewBtn').onclick=stopPreview;
+    document.getElementById('exportVideoBtn').onclick=exportVideo;
+    document.getElementById('exportWavBtn').onclick=exportWav;
+    document.getElementById('exportMp3Btn').onclick=exportMp3;
+    document.getElementById('aspectSelect').onchange=updateCanvasSize;
+    document.getElementById('resSelect').onchange=updateCanvasSize;
+
+    // Waveform selection
+    container.addEventListener('mousedown',e=>{
+        if(!audioBuffer) return;
+        const rect=container.getBoundingClientRect();
+        selStartX=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+        selEndX=selStartX;
+        isSelecting=true;
+        selectionRegion.style.display='block';
+        selectionRegion.style.left=(selStartX*100)+'%';
+        selectionRegion.style.width='0%';
+    });
+    container.addEventListener('mousemove',e=>{
+        if(!isSelecting||!audioBuffer) return;
+        const rect=container.getBoundingClientRect();
+        selEndX=Math.max(0,Math.min(1,(e.clientX-rect.left)/rect.width));
+        const left=Math.min(selStartX,selEndX);
+        const width=Math.abs(selEndX-selStartX);
+        selectionRegion.style.left=(left*100)+'%';
+        selectionRegion.style.width=(width*100)+'%';
+    });
+    window.addEventListener('mouseup',()=>{
+        if(!isSelecting||!audioBuffer) return;
+        isSelecting=false;
+        const startPct=Math.min(selStartX,selEndX);
+        const endPct=Math.max(selStartX,selEndX);
+        if(endPct-startPct<0.004){clearSelection();return}
+        selectedStartSample=Math.floor(startPct*audioBuffer.length);
+        selectedEndSample=Math.floor(endPct*audioBuffer.length);
+    });
+
+    // Free drag for Text & Overlay
+    previewCanvas.addEventListener('mousedown',e=>{
+        const rect=previewCanvas.getBoundingClientRect();
+        const x=(e.clientX-rect.left)*(previewCanvas.width/rect.width);
+        const y=(e.clientY-rect.top)*(previewCanvas.height/rect.height);
+
+        // Check overlay first
+        if(overlay.img){
+            const sizePct=parseFloat(document.getElementById('overlaySize').value)/100;
+            const ow=previewCanvas.width*sizePct;
+            const oh=overlay.img.height*(ow/overlay.img.width);
+            const ox=overlay.x*previewCanvas.width-ow/2;
+            const oy=overlay.y*previewCanvas.height-oh/2;
+            if(x>=ox&&x<=ox+ow&&y>=oy&&y<=oy+oh){
+                isDraggingOverlay=true;
+                dragOffset.x=x-(overlay.x*previewCanvas.width);
+                dragOffset.y=y-(overlay.y*previewCanvas.height);
+                return;
             }
+        }
 
-            function updateSelectionStatus() {
-                if (selectedSegment) updateSelectionDisplay();
-                else {
-                    selectionBox.style.display = 'none';
-                    document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
-                }
-            }
+        // Text
+        if(textOverlays.length){
+            selectedTextIdx=textOverlays.length-1;
+            const t=textOverlays[selectedTextIdx];
+            dragOffset.x=x-t.x;
+            dragOffset.y=y-t.y;
+            isDraggingText=true;
+        }
+    });
 
-            // Mouse events
-            container.addEventListener('mousedown', (e) => {
-                if (!audioBuffer || isProcessing) return;
-                const rect = container.getBoundingClientRect();
-                const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-                isMouseDown = true;
-                selStart = pct;
-                selEnd = pct;
-                isSelecting = true;
-                selectedSegment = {
-                    start: getSampleFromPct(pct),
-                    end: getSampleFromPct(pct)
-                };
-                updateSelectionDisplay();
-            });
+    window.addEventListener('mousemove',e=>{
+        const rect=previewCanvas.getBoundingClientRect();
+        const x=(e.clientX-rect.left)*(previewCanvas.width/rect.width);
+        const y=(e.clientY-rect.top)*(previewCanvas.height/rect.height);
 
-            container.addEventListener('mousemove', (e) => {
-                if (!isMouseDown || !isSelecting || !audioBuffer || isProcessing) return;
-                const rect = container.getBoundingClientRect();
-                const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-                selEnd = pct;
-                const sp = Math.min(selStart, selEnd);
-                const ep = Math.max(selStart, selEnd);
-                selectedSegment = {
-                    start: getSampleFromPct(sp),
-                    end: getSampleFromPct(ep)
-                };
-                updateSelectionDisplay();
-            });
+        if(isDraggingOverlay){
+            overlay.x=Math.max(0.05,Math.min(0.95,(x-dragOffset.x)/previewCanvas.width));
+            overlay.y=Math.max(0.05,Math.min(0.95,(y-dragOffset.y)/previewCanvas.height));
+            drawPreviewFrame(currentTime||0);
+        }
+        if(isDraggingText&&selectedTextIdx>=0){
+            const t=textOverlays[selectedTextIdx];
+            t.x=x-dragOffset.x;
+            t.y=y-dragOffset.y;
+            drawPreviewFrame(currentTime||0);
+        }
+    });
+    window.addEventListener('mouseup',()=>{isDraggingText=false;isDraggingOverlay=false});
 
-            document.addEventListener('mouseup', () => {
-                if (isMouseDown && isSelecting && selectedSegment) {
-                    if (selectedSegment.end - selectedSegment.start < 100) {
-                        selectedSegment = null;
-                        selectionBox.style.display = 'none';
-                        document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
-                    } else {
-                        updateSelectionDisplay();
-                    }
-                }
-                isMouseDown = false;
-                isSelecting = false;
-            });
+    previewCanvas.addEventListener('wheel',e=>{
+        if(selectedTextIdx<0) return;
+        e.preventDefault();
+        const t=textOverlays[selectedTextIdx];
+        if(e.shiftKey) t.rotation=(t.rotation||0)+(e.deltaY>0?0.06:-0.06);
+        else t.scale=Math.max(0.25,Math.min(4.5,t.scale+(e.deltaY>0?-0.07:0.07)));
+        drawPreviewFrame(currentTime||0);
+    },{passive:false});
 
-            // ================================================
-            // REMOVE SELECTED
-            // ================================================
-            function removeSelected() {
-                if (!selectedSegment || !audioBuffer) {
-                    alert('Kwanza chagua sehemu kwa kubonyeza na kuburuta kwenye waveform.');
-                    return;
-                }
-
-                const data = audioBuffer.getChannelData(0);
-                let newData = [];
-                const s = selectedSegment.start;
-                const e = selectedSegment.end;
-
-                for (let i = 0; i < data.length; i++) {
-                    if (i < s || i >= e) {
-                        newData.push(data[i]);
-                    }
-                }
-
-                if (newData.length === 0) {
-                    alert('Hakuna sehemu iliyobaki!');
-                    return;
-                }
-
-                const nb = audioCtx.createBuffer(1, newData.length, audioBuffer.sampleRate);
-                nb.copyToChannel(new Float32Array(newData), 0);
-
-                // Update originalSegments if gaps removed
-                if (gapsRemoved && originalSegments.length > 0) {
-                    let newOrig = [];
-                    let pos = 0;
-                    originalSegments.forEach(seg => {
-                        const len = seg.end - seg.start;
-                        newOrig.push({ start: pos, end: pos + len });
-                        pos += len;
-                    });
-                    originalSegments = newOrig;
-                }
-
-                selectedSegment = null;
-                selectionBox.style.display = 'none';
-                document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
-                loadAudio(nb, false);
-                document.getElementById('statusDisplay').innerHTML =
-                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Sehemu imeondolewa`;
-            }
-
-            // ================================================
-            // RESTORE ORIGINAL
-            // ================================================
-            function restoreOriginal() {
-                if (!originalBuffer) return;
-                audioBuffer = originalBuffer;
-                segments = [{ start: 0, end: audioBuffer.length }];
-                gapsRemoved = false;
-                originalSegments = [];
-                loadAudio(audioBuffer, false);
-                document.getElementById('statusDisplay').innerHTML =
-                    `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> Imerejeshwa`;
-                document.getElementById('metricsBox').classList.remove('active');
-            }
-
-            // ================================================
-            // EXPORT
-            // ================================================
-            function exportAudio(mimeType, ext) {
-                if (!audioBuffer) return alert('Hakuna audio!');
-                const data = audioBuffer.getChannelData(0);
-                const wav = encodeWAV(data, audioBuffer.sampleRate);
-                const blob = new Blob([wav], { type: mimeType });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `sauti_processed.${ext}`;
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-
-            function encodeWAV(samples, rate) {
-                const buf = new ArrayBuffer(44 + samples.length * 2);
-                const v = new DataView(buf);
-                const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-                ws(0, 'RIFF');
-                v.setUint32(4, 36 + samples.length * 2, true);
-                ws(8, 'WAVE');
-                ws(12, 'fmt ');
-                v.setUint32(16, 16, true);
-                v.setUint16(20, 1, true);
-                v.setUint16(22, 1, true);
-                v.setUint32(24, rate, true);
-                v.setUint32(28, rate * 2, true);
-                v.setUint16(32, 2, true);
-                v.setUint16(34, 16, true);
-                ws(36, 'data');
-                v.setUint32(40, samples.length * 2, true);
-                for (let i = 0; i < samples.length; i++) {
-                    v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, samples[i])) * 0x7FFF, true);
-                }
-                return buf;
-            }
-
-            // ================================================
-            // RESIZE
-            // ================================================
-            function resizeCanvas() {
-                const rect = container.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-                if (audioBuffer) renderWaveform(audioBuffer);
-            }
-            window.addEventListener('resize', resizeCanvas);
-            setTimeout(resizeCanvas, 100);
-
-            // ================================================
-            // UI BINDINGS
-            // ================================================
-            document.getElementById('thresholdSlider').addEventListener('input', function() {
-                document.getElementById('thresholdVal').textContent = this.value;
-            });
-            document.getElementById('gapSlider').addEventListener('input', function() {
-                document.getElementById('gapVal').textContent = this.value;
-            });
-            document.getElementById('paddingSlider').addEventListener('input', function() {
-                document.getElementById('paddingVal').textContent = this.value;
-            });
-
-            document.getElementById('recordBtn').addEventListener('click', () => {
-                if (!mediaRecorder || mediaRecorder.state !== 'recording') startRecording();
-                else stopRecording();
-            });
-            document.getElementById('stopBtn').addEventListener('click', stopRecording);
-
-            document.getElementById('playBtn').addEventListener('click', () => {
-                if (isPlaying) pausePlayback();
-                else playAudio();
-            });
-            document.getElementById('pauseBtn').addEventListener('click', pausePlayback);
-
-            document.getElementById('uploadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
-            document.getElementById('fileInput').addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const ab = await file.arrayBuffer();
-                initAudio();
-                const buf = await audioCtx.decodeAudioData(ab);
-                gapsRemoved = false;
-                originalSegments = [];
-                loadAudio(buf);
-                document.getElementById('metricsBox').classList.remove('active');
-            });
-
-            document.getElementById('autoRemoveBtn').addEventListener('click', () => {
-                if (!originalBuffer) {
-                    alert('Kwanza weka audio! Rekodi au upload.');
-                    return;
-                }
-                if (isProcessing) return;
-                isProcessing = true;
-                document.getElementById('autoRemoveBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inachakata...';
-                document.getElementById('statusDisplay').innerHTML =
-                    `<i class="fas fa-circle" style="color:#ffbb5e;"></i> AI inachakata...`;
-
-                // Use setTimeout to avoid blocking UI
-                setTimeout(() => {
-                    try {
-                        const result = aiRemoveSilence(originalBuffer);
-                        if (result) {
-                            loadAudio(result, false);
-                            const count = originalSegments.length;
-                            document.getElementById('statusDisplay').innerHTML =
-                                `<i class="fas fa-check-circle" style="color:#5fba7a;"></i> ✅ AI VAD: Vipande ${count} vimeunganishwa!`;
-                            document.getElementById('liveBadge').classList.add('active');
-                            setTimeout(() => document.getElementById('liveBadge').classList.remove('active'), 2000);
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        document.getElementById('statusDisplay').innerHTML =
-                            `<i class="fas fa-exclamation-circle" style="color:#ff6b6b;"></i> Hitilafu: ${err.message}`;
-                    }
-                    isProcessing = false;
-                    document.getElementById('autoRemoveBtn').innerHTML = '<i class="fas fa-magic"></i> AI Remove Silence';
-                }, 100);
-            });
-
-            document.getElementById('resetBtn').addEventListener('click', restoreOriginal);
-
-            document.getElementById('removeSelectedBtn').addEventListener('click', removeSelected);
-
-            document.getElementById('exportBtn').addEventListener('click', () => exportAudio('audio/mpeg', 'mp3'));
-            document.getElementById('exportWavBtn').addEventListener('click', () => exportAudio('audio/wav', 'wav'));
-
-            document.getElementById('clearBtn').addEventListener('click', () => {
-                originalBuffer = null;
-                audioBuffer = null;
-                segments = [];
-                selectedSegment = null;
-                gapsRemoved = false;
-                originalSegments = [];
-                isProcessing = false;
-                stopPlayback();
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                document.getElementById('statusDisplay').innerHTML =
-                    `<i class="fas fa-circle" style="color:#6c8cff;"></i> Tayari`;
-                document.getElementById('timeDisplay').textContent = '00:00 / 00:00';
-                document.getElementById('segmentInfo').textContent = 'Sehemu: 0';
-                selectionBox.style.display = 'none';
-                document.getElementById('selectionStatus').textContent = 'Hakuna sehemu iliyochaguliwa';
-                document.getElementById('metricsBox').classList.remove('active');
-                document.getElementById('autoRemoveBtn').innerHTML = '<i class="fas fa-magic"></i> AI Remove Silence';
-            });
-
-            // Font Awesome CDN
-            const fontAwesome = document.createElement('link');
-            fontAwesome.rel = 'stylesheet';
-            fontAwesome.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
-            document.head.appendChild(fontAwesome);
-
-            console.log('🎙️ AI Studio · Silence Remover loaded!');
-            console.log('📌 Instructions:');
-            console.log('  1. Click "Rekodi" → Countdown 3..2..1 → Start speaking');
-            console.log('  2. Click "AI Remove Silence" → AI detects and removes silence');
-            console.log('  3. Click "Pakua MP3/WAV" to export');
-
-        })();
-    </script>
-
+    function resizeWave(){
+        const rect=container.getBoundingClientRect();
+        waveCanvas.width=rect.width;
+        waveCanvas.height=rect.height;
+        if(audioBuffer) renderWaveform(audioBuffer);
+    }
+    window.addEventListener('resize',resizeWave);
+    setTimeout(resizeWave,50);
+    updateCanvasSize();
+})();
+</script>
 </body>
 </html>
