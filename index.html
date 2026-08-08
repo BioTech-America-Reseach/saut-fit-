@@ -1,675 +1,1819 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>AI Studio Pro · Reliable</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f6;padding:12px;min-height:100vh}
-.container{max-width:1360px;margin:0 auto;background:#0d121b;border-radius:18px;padding:16px;border:1px solid #1c2536}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.header h1{font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px}
-.header h1 i{color:#60a5fa}
-.badge{background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:3px 10px;border-radius:14px;font-size:0.55rem;font-weight:700}
-.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#172033;padding:8px 12px;border-radius:28px;margin-bottom:12px;border:1px solid #2a364d}
-.toolbar button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:6px 12px;border-radius:16px;font-weight:600;font-size:0.73rem;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
-.toolbar button:hover{background:#3b4b66}
-.toolbar button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
-.toolbar button.success{background:#10b981;border-color:#10b981;color:#fff}
-.toolbar button.warning{background:#f59e0b;border-color:#f59e0b;color:#fff}
-.toolbar button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
-.toolbar button:disabled{opacity:0.45;cursor:not-allowed}
-.sep{width:1px;height:20px;background:#3b4b66}
-.status-text{font-size:0.7rem;color:#94a3b8;margin-left:auto;padding:3px 10px;background:#0f172a;border-radius:12px}
-.main-grid{display:grid;grid-template-columns:1fr 300px;gap:12px}
-@media(max-width:980px){.main-grid{grid-template-columns:1fr}}
-.preview-panel{background:#0f172a;border-radius:14px;border:1px solid #1e293b;overflow:hidden}
-.preview-header{padding:7px 12px;background:#1e293b;display:flex;justify-content:space-between;font-size:0.72rem;color:#94a3b8}
-#previewCanvas{width:100%;background:#000;display:block;cursor:grab}
-.preview-controls{padding:7px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:#0f172a}
-.preview-controls button,.preview-controls select{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 9px;border-radius:11px;font-size:0.71rem;cursor:pointer}
-.preview-controls button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
-.side-panel{display:flex;flex-direction:column;gap:9px}
-.panel{background:#172033;border-radius:13px;border:1px solid #2a364d;padding:10px 12px}
-.panel h3{font-size:0.78rem;color:#fbbf24;margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.panel label{font-size:0.66rem;color:#94a3b8;display:block;margin-bottom:3px}
-.panel select,.panel input[type=number],.panel textarea{width:100%;background:#0f172a;border:1px solid #2a364d;color:#e2e8f0;padding:6px 8px;border-radius:7px;font-size:0.74rem;margin-bottom:5px}
-.panel textarea{min-height:42px;resize:vertical}
-.btn-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
-.btn-row button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 9px;border-radius:7px;font-size:0.7rem;cursor:pointer}
-.btn-row button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
-.btn-row button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
-.image-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;max-height:80px;overflow-y:auto}
-.thumb-wrap{position:relative}
-.image-thumb{width:42px;height:42px;border-radius:6px;object-fit:cover;border:2px solid #3b4b66;cursor:pointer}
-.image-thumb.selected{border-color:#fbbf24}
-.thumb-del{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;width:15px;height:15px;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.wave-area{background:#0f172a;border-radius:13px;padding:9px;border:1px solid #1e293b;margin-top:9px}
-#wave-container{width:100%;height:90px;background:#020617;border-radius:9px;position:relative;overflow:hidden;cursor:pointer}
-#waveCanvas{display:block;width:100%;height:100%}
-.playhead{position:absolute;top:0;width:3px;height:100%;background:#fbbf24;box-shadow:0 0 8px #fbbf24cc;z-index:10;cursor:ew-resize}
-.playhead::before{content:'';position:absolute;top:-2px;left:-5px;width:13px;height:13px;background:#fbbf24;border-radius:50%}
-.selection-region{position:absolute;top:0;height:100%;background:rgba(239,68,68,0.25);border:1px solid #ef4444;z-index:4;display:none;pointer-events:none}
-.transport{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
-.transport button{background:transparent;border:none;color:#cbd5e1;font-size:1rem;padding:4px 7px;cursor:pointer}
-.transport .play-btn{background:#3b82f6;color:#fff;padding:6px 16px;font-size:0.85rem;border-radius:20px;font-weight:700}
-#timeDisplay{font-size:0.8rem;color:#fbbf24;font-weight:600;min-width:110px}
-.controls{display:flex;flex-wrap:wrap;gap:8px 12px;background:#172033;padding:7px 12px;border-radius:20px;margin-top:6px;border:1px solid #2a364d;align-items:center}
-.controls label{font-size:0.63rem;color:#94a3b8;display:flex;align-items:center;gap:4px}
-.controls input[type=range]{width:50px;height:3px;background:#2a364d;border-radius:5px;-webkit-appearance:none}
-.controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:#fbbf24;border-radius:50%;cursor:pointer}
-.file-hidden{display:none}
-.info-bar{margin-top:8px;font-size:0.65rem;color:#64748b}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI Studio Pro · Viral Matrix</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#05080f;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f6;padding:10px;min-height:100vh}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-track{background:#0d121b}
+        ::-webkit-scrollbar-thumb{background:#3b4b66;border-radius:10px}
+        .app{max-width:1500px;margin:0 auto;background:#0b1019;border-radius:20px;padding:16px;border:1px solid #1a2538;box-shadow:0 20px 60px rgba(0,0,0,0.8)}
+        .header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #1a2538}
+        .header h1{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .header h1 i{-webkit-text-fill-color:#60a5fa;font-size:1.2rem}
+        .badge{background:linear-gradient(135deg,#f59e0b,#ef4444);padding:2px 12px;border-radius:30px;font-size:0.55rem;font-weight:700;color:#fff;-webkit-text-fill-color:#fff;letter-spacing:0.5px;text-transform:uppercase}
+        .header-actions{display:flex;gap:6px;flex-wrap:wrap}
+        .header-actions button{background:#1a2538;border:1px solid #2a364d;color:#cbd5e1;padding:5px 12px;border-radius:20px;font-size:0.68rem;font-weight:600;cursor:pointer;transition:0.2s;display:flex;align-items:center;gap:5px}
+        .header-actions button:hover{background:#2a364d;border-color:#3b4b66}
+        .header-actions button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+        .header-actions button.primary:hover{background:#2563eb}
+        .header-actions button.success{background:#10b981;border-color:#10b981;color:#fff}
+        .header-actions button.success:hover{background:#059669}
+        .header-actions button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
+        .header-actions button.danger:hover{background:#dc2626}
+        .header-actions button.warning{background:#f59e0b;border-color:#f59e0b;color:#fff}
+        .header-actions button.warning:hover{background:#d97706}
+        .header-actions button:disabled{opacity:0.4;cursor:not-allowed}
+        .toolbar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;background:#0f172a;padding:7px 12px;border-radius:30px;margin-bottom:12px;border:1px solid #1a2538}
+        .toolbar button{background:transparent;border:1px solid #2a364d;color:#cbd5e1;padding:5px 10px;border-radius:16px;font-size:0.68rem;font-weight:600;cursor:pointer;transition:0.2s;display:inline-flex;align-items:center;gap:4px}
+        .toolbar button:hover{background:#1a2538;border-color:#3b4b66}
+        .toolbar button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+        .toolbar button.primary:hover{background:#2563eb}
+        .toolbar button.success{background:#10b981;border-color:#10b981;color:#fff}
+        .toolbar button.success:hover{background:#059669}
+        .toolbar button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
+        .toolbar button.danger:hover{background:#dc2626}
+        .toolbar button.warning{background:#f59e0b;border-color:#f59e0b;color:#fff}
+        .toolbar button.warning:hover{background:#d97706}
+        .toolbar button.move-btn{background:#8b5cf6;border-color:#8b5cf6;color:#fff}
+        .toolbar button.move-btn:hover{background:#7c3aed}
+        .sep{width:1px;height:22px;background:#2a364d}
+        .status-text{font-size:0.62rem;color:#94a3b8;margin-left:auto;padding:2px 12px;background:#0f172a;border-radius:20px;border:1px solid #1a2538}
+        .file-hidden{display:none}
+        .main-grid{display:grid;grid-template-columns:1fr 320px;gap:12px}
+        @media(max-width:1100px){.main-grid{grid-template-columns:1fr}}
+        .preview-panel{background:#0a0f18;border-radius:16px;border:1px solid #1a2538;overflow:hidden}
+        .preview-header{padding:6px 14px;background:#0f172a;display:flex;justify-content:space-between;font-size:0.65rem;color:#94a3b8;border-bottom:1px solid #1a2538;flex-wrap:wrap;gap:4px}
+        #previewCanvas{width:100%;background:#000;display:block;cursor:grab;aspect-ratio:16/9;touch-action:none}
+        #previewCanvas:active{cursor:grabbing}
+        .preview-controls{padding:6px 12px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;background:#0f172a;border-top:1px solid #1a2538}
+        .preview-controls button,.preview-controls select{background:#1a2538;border:1px solid #2a364d;color:#cbd5e1;padding:4px 10px;border-radius:12px;font-size:0.65rem;cursor:pointer}
+        .preview-controls button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+        .preview-controls button.primary:hover{background:#2563eb}
+        .preview-controls select{background:#0f172a}
+        .wave-area{background:#0a0f18;border-radius:16px;padding:10px;border:1px solid #1a2538;margin-top:10px}
+        #wave-container{width:100%;height:90px;background:#020617;border-radius:10px;position:relative;overflow:hidden;cursor:pointer;user-select:none}
+        #waveCanvas{display:block;width:100%;height:100%;pointer-events:none}
+        .playhead{position:absolute;top:0;width:3px;height:100%;background:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,0.7);z-index:10;cursor:ew-resize;pointer-events:none}
+        .playhead::after{content:'';position:absolute;top:-4px;left:-7px;width:17px;height:17px;background:#fbbf24;border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px rgba(251,191,36,0.5)}
+        #dragSelection{position:absolute;top:0;height:100%;background:rgba(139,92,246,0.35);border-left:2px solid #8b5cf6;border-right:2px solid #8b5cf6;z-index:5;pointer-events:none;display:none}
+        #dragSelection .sel-handle{position:absolute;top:0;width:12px;height:100%;cursor:ew-resize;pointer-events:all;background:rgba(139,92,246,0.2)}
+        #dragSelection .sel-handle.left{left:-6px}
+        #dragSelection .sel-handle.right{right:-6px}
+        .move-mode-active #dragSelection{background:rgba(251,191,36,0.25);border-color:#fbbf24}
+        .transport{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+        .transport button{background:transparent;border:none;color:#cbd5e1;font-size:0.9rem;padding:3px 8px;cursor:pointer;border-radius:8px;transition:0.2s}
+        .transport button:hover{background:#1a2538}
+        .transport .play-btn{background:#3b82f6;color:#fff;padding:5px 18px;font-size:0.8rem;border-radius:30px;font-weight:700}
+        .transport .play-btn:hover{background:#2563eb}
+        #timeDisplay{font-size:0.78rem;color:#fbbf24;font-weight:600;min-width:130px;font-variant-numeric:tabular-nums}
+        .transport .danger-btn{background:#ef4444;color:#fff;border:none;padding:4px 14px;border-radius:16px;font-size:0.65rem;font-weight:600;cursor:pointer}
+        .transport .danger-btn:hover{background:#dc2626}
+        .transport .success-btn{background:#10b981;color:#fff;border:none;padding:4px 14px;border-radius:16px;font-size:0.65rem;font-weight:600;cursor:pointer}
+        .transport .success-btn:hover{background:#059669}
+        .transport .purple-btn{background:#8b5cf6;color:#fff;border:none;padding:4px 14px;border-radius:16px;font-size:0.65rem;font-weight:600;cursor:pointer}
+        .transport .purple-btn:hover{background:#7c3aed}
+        .controls-row{display:flex;flex-wrap:wrap;gap:8px 16px;background:#0f172a;padding:6px 14px;border-radius:20px;margin-top:6px;border:1px solid #1a2538;align-items:center}
+        .controls-row label{font-size:0.58rem;color:#94a3b8;display:flex;align-items:center;gap:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
+        .controls-row input[type=range]{width:50px;height:3px;background:#2a364d;border-radius:5px;-webkit-appearance:none;appearance:none}
+        .controls-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:#fbbf24;border-radius:50%;cursor:pointer;border:2px solid #0f172a}
+        .controls-row input[type=range]::-moz-range-thumb{width:12px;height:12px;background:#fbbf24;border-radius:50%;cursor:pointer;border:2px solid #0f172a}
+        .side-panel{display:flex;flex-direction:column;gap:8px}
+        .panel{background:#0f172a;border-radius:14px;border:1px solid #1a2538;padding:10px 12px}
+        .panel h3{font-size:0.7rem;color:#fbbf24;margin-bottom:6px;display:flex;align-items:center;gap:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+        .panel h3 i{color:#60a5fa}
+        .panel label{font-size:0.6rem;color:#94a3b8;display:block;margin-bottom:2px;font-weight:600}
+        .panel select,.panel input[type=number],.panel textarea,.panel input[type=text]{width:100%;background:#020617;border:1px solid #1a2538;color:#e2e8f0;padding:5px 8px;border-radius:8px;font-size:0.7rem;margin-bottom:4px;font-family:inherit}
+        .panel textarea{min-height:42px;resize:vertical}
+        .panel select:focus,.panel input:focus,.panel textarea:focus{outline:none;border-color:#3b82f6}
+        .btn-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+        .btn-row button{background:#1a2538;border:1px solid #2a364d;color:#cbd5e1;padding:4px 10px;border-radius:8px;font-size:0.62rem;font-weight:600;cursor:pointer;transition:0.2s}
+        .btn-row button:hover{background:#2a364d;border-color:#3b4b66}
+        .btn-row button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
+        .btn-row button.primary:hover{background:#2563eb}
+        .btn-row button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
+        .btn-row button.danger:hover{background:#dc2626}
+        .btn-row button.success{background:#10b981;border-color:#10b981;color:#fff}
+        .btn-row button.success:hover{background:#059669}
+        .btn-row button.warning{background:#f59e0b;border-color:#f59e0b;color:#fff}
+        .btn-row button.warning:hover{background:#d97706}
+        .btn-row button.purple{background:#8b5cf6;border-color:#8b5cf6;color:#fff}
+        .btn-row button.purple:hover{background:#7c3aed}
+        .image-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;max-height:70px;overflow-y:auto;padding:2px}
+        .thumb-wrap{position:relative;flex-shrink:0}
+        .image-thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;border:2px solid #2a364d;cursor:pointer;transition:0.2s}
+        .image-thumb:hover{border-color:#3b82f6;transform:scale(1.05)}
+        .thumb-del{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;width:16px;height:16px;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid #0f172a;font-weight:700}
+        .thumb-del:hover{background:#dc2626}
+        .video-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;max-height:70px;overflow-y:auto;padding:2px}
+        .video-thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;border:2px solid #2a364d;cursor:pointer;background:#020617;display:flex;align-items:center;justify-content:center;font-size:0.5rem;color:#94a3b8;position:relative}
+        .video-thumb i{font-size:1.2rem;color:#3b82f6}
+        .video-thumb .v-label{position:absolute;bottom:2px;background:rgba(0,0,0,0.7);font-size:0.45rem;padding:0 4px;border-radius:3px}
+        .color-row{display:flex;gap:4px;margin-bottom:4px}
+        .color-row input[type=color]{flex:1;height:28px;border:1px solid #1a2538;border-radius:6px;background:transparent;cursor:pointer;padding:2px}
+        .check-row{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 4px}
+        .check-row label{font-size:0.6rem;color:#94a3b8;display:flex;align-items:center;gap:4px;font-weight:500;cursor:pointer}
+        .check-row input[type=checkbox]{accent-color:#3b82f6;width:14px;height:14px;cursor:pointer}
+        .info-bar{margin-top:10px;font-size:0.6rem;color:#64748b;line-height:1.6;padding:8px 14px;background:#0f172a;border-radius:12px;border:1px solid #1a2538;display:flex;flex-wrap:wrap;gap:4px 16px}
+        .info-bar b{color:#94a3b8}
+        .info-bar i{color:#60a5fa;margin-right:3px}
+        @media(max-width:600px){.app{padding:8px}.header h1{font-size:1rem}.toolbar{padding:5px 8px;gap:3px}.toolbar button{font-size:0.58rem;padding:3px 7px}.panel{padding:8px}.preview-controls{padding:4px 8px;gap:3px}.preview-controls button,.preview-controls select{font-size:0.58rem;padding:3px 7px}.controls-row{gap:4px 10px;padding:4px 10px}.controls-row label{font-size:0.5rem}.controls-row input[type=range]{width:36px}.transport .play-btn{padding:4px 12px;font-size:0.7rem}#timeDisplay{font-size:0.65rem;min-width:100px}}
+        @keyframes matrixGlow{0%{box-shadow:0 0 20px rgba(96,165,250,0.1)}50%{box-shadow:0 0 40px rgba(96,165,250,0.3),0 0 80px rgba(167,139,250,0.1)}100%{box-shadow:0 0 20px rgba(96,165,250,0.1)}}
+        .app{animation:matrixGlow 4s ease-in-out infinite}
+        .spinner{display:inline-block;width:14px;height:14px;border:2px solid #2a364d;border-top-color:#fbbf24;border-radius:50%;animation:spin 0.7s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .audio-toolbar .btn-group{display:flex;gap:4px;flex-wrap:wrap}
+        .audio-toolbar .btn-group button{padding:3px 10px;font-size:0.6rem;border-radius:12px;border:1px solid #2a364d;background:#1a2538;color:#cbd5e1;cursor:pointer;transition:0.2s}
+        .audio-toolbar .btn-group button:hover{background:#2a364d}
+        .audio-toolbar .btn-group button.active{background:#3b82f6;border-color:#3b82f6;color:#fff}
+        .audio-toolbar .btn-group button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
+        .audio-toolbar .btn-group button.danger:hover{background:#dc2626}
+        .audio-toolbar .btn-group button.success{background:#10b981;border-color:#10b981;color:#fff}
+        .audio-toolbar .btn-group button.success:hover{background:#059669}
+        .audio-toolbar .btn-group button.purple{background:#8b5cf6;border-color:#8b5cf6;color:#fff}
+        .audio-toolbar .btn-group button.purple:hover{background:#7c3aed}
+    </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Reliable</span></h1>
-    </div>
+    <div class="app">
+        <div class="header">
+            <h1><i class="fas fa-microchip"></i> AI Studio <span class="badge">Viral Matrix</span></h1>
+            <div class="header-actions">
+                <button id="recordBtn" class="primary"><i class="fas fa-circle"></i> Rekodi</button>
+                <button id="stopRecordBtn" class="danger"><i class="fas fa-stop"></i></button>
+                <button id="uploadAudioBtn"><i class="fas fa-upload"></i> Audio</button>
+                <input type="file" id="audioInput" class="file-hidden" accept="audio/*">
+                <button id="uploadMediaBtn"><i class="fas fa-photo-video"></i> Media</button>
+                <input type="file" id="mediaInput" class="file-hidden" accept="image/*,video/*" multiple>
+                <button id="exportVideoBtn" class="success"><i class="fas fa-download"></i> Pakua</button>
+            </div>
+        </div>
 
-    <div class="toolbar">
-        <button id="recordBtn" class="primary"><i class="fas fa-circle"></i> Rekodi</button>
-        <button id="stopBtn" class="danger"><i class="fas fa-stop"></i></button>
-        <div class="sep"></div>
-        <button id="uploadAudioBtn"><i class="fas fa-upload"></i> Audio</button>
-        <input type="file" id="audioInput" class="file-hidden" accept="audio/*">
-        <button id="uploadImageBtn"><i class="fas fa-images"></i> Picha</button>
-        <input type="file" id="imageInput" class="file-hidden" accept="image/*" multiple>
-        <div class="sep"></div>
-        <button id="undoBtn" title="Undo"><i class="fas fa-undo"></i></button>
-        <button id="redoBtn" title="Redo"><i class="fas fa-redo"></i></button>
-        <div class="sep"></div>
-        <button id="autoRemoveBtn" class="warning"><i class="fas fa-magic"></i> Ondoa Silence</button>
-        <button id="enhanceBtn" class="success"><i class="fas fa-sliders"></i> Boost</button>
-        <span class="status-text" id="statusDisplay">Tayari</span>
-    </div>
+        <div class="toolbar">
+            <button id="undoBtn" title="Undo"><i class="fas fa-undo"></i></button>
+            <button id="redoBtn" title="Redo"><i class="fas fa-redo"></i></button>
+            <div class="sep"></div>
+            <button id="autoCleanBtn" class="warning"><i class="fas fa-magic"></i> Clean Silence</button>
+            <button id="boostAudioBtn" class="success"><i class="fas fa-sliders-h"></i> Boost Voice</button>
+            <button id="normalizeBtn" class="primary"><i class="fas fa-wave-square"></i> Normalize</button>
+            <div class="sep"></div>
+            <button id="addMrBeastText" class="warning"><i class="fas fa-fire"></i> MrBeast Text</button>
+            <span class="status-text" id="statusDisplay"><i class="fas fa-check-circle" style="color:#10b981;"></i> Tayari</span>
+        </div>
 
-    <div class="main-grid">
-        <div>
-            <div class="preview-panel">
-                <div class="preview-header">
-                    <span>Preview</span>
-                    <span id="previewRes">1280×720</span>
+        <div class="main-grid">
+            <div>
+                <div class="preview-panel">
+                    <div class="preview-header">
+                        <span><i class="fas fa-eye"></i> Preview • <span style="color:#fbbf24;">Drag Text</span> · <span style="color:#60a5fa;">Scroll=Zoom</span> · <span style="color:#a78bfa;">Shift+Scroll=Rotate</span></span>
+                        <span id="previewRes">1280×720</span>
+                    </div>
+                    <canvas id="previewCanvas" width="1280" height="720"></canvas>
+                    <div class="preview-controls">
+                        <button id="playPreviewBtn" class="primary"><i class="fas fa-play"></i> Play</button>
+                        <button id="pausePreviewBtn"><i class="fas fa-pause"></i></button>
+                        <button id="stopPreviewBtn"><i class="fas fa-stop"></i></button>
+                        <select id="aspectSelect">
+                            <option value="16:9">16:9</option>
+                            <option value="9:16">9:16 TikTok</option>
+                            <option value="1:1">1:1</option>
+                        </select>
+                        <select id="resSelect">
+                            <option value="720" selected>720p</option>
+                            <option value="1080">1080p</option>
+                            <option value="480">480p</option>
+                        </select>
+                        <span style="margin-left:auto;font-size:0.6rem;color:#64748b;" id="clipCount">Clips: 0</span>
+                    </div>
                 </div>
-                <canvas id="previewCanvas" width="1280" height="720"></canvas>
-                <div class="preview-controls">
-                    <button id="playPreviewBtn" class="primary"><i class="fas fa-play"></i> Cheza</button>
-                    <button id="stopPreviewBtn"><i class="fas fa-stop"></i></button>
-                    <select id="aspectSelect">
-                        <option value="16:9">16:9</option>
-                        <option value="9:16">9:16 TikTok</option>
-                        <option value="1:1">1:1</option>
-                    </select>
-                    <select id="resSelect">
-                        <option value="720" selected>720p</option>
-                        <option value="1080">1080p</option>
-                        <option value="480">480p</option>
-                    </select>
+
+                <div class="wave-area">
+                    <div id="wave-container">
+                        <canvas id="waveCanvas"></canvas>
+                        <div id="playhead" class="playhead" style="left:0%"></div>
+                        <div id="dragSelection">
+                            <div class="sel-handle left" id="selHandleLeft"></div>
+                            <div class="sel-handle right" id="selHandleRight"></div>
+                        </div>
+                    </div>
+                    <div class="transport audio-toolbar">
+                        <button id="playBtn" class="play-btn"><i class="fas fa-play"></i></button>
+                        <button id="pauseBtn"><i class="fas fa-pause"></i></button>
+                        <button id="stopBtn"><i class="fas fa-stop"></i></button>
+                        <span id="timeDisplay">00:00.0 / 00:00.0</span>
+                        <div class="btn-group" style="margin-left:6px;">
+                            <button id="deleteSelBtn" class="danger"><i class="fas fa-trash"></i> Futa</button>
+                            <button id="splitSelBtn" class="purple"><i class="fas fa-cut"></i> Gawanya</button>
+                            <button id="moveToggleBtn" class="success"><i class="fas fa-arrows-alt-h"></i> Hamisha</button>
+                        </div>
+                    </div>
+                    <div class="controls-row">
+                        <label>Silence <input type="range" id="thresholdSlider" min="20" max="55" value="42"></label>
+                        <label>Min <input type="range" id="minSilenceSlider" min="200" max="1000" value="500"></label>
+                        <label>Pad <input type="range" id="paddingSlider" min="20" max="120" value="50"></label>
+                        <label>Boost <input type="range" id="boostSlider" min="120" max="250" value="165"></label>
+                        <label>Volume <input type="range" id="volumeSlider" min="0" max="200" value="100"></label>
+                    </div>
                 </div>
             </div>
 
-            <div class="wave-area">
-                <div id="wave-container">
-                    <canvas id="waveCanvas"></canvas>
-                    <div id="playhead" class="playhead" style="left:0%"></div>
-                    <div id="selectionRegion" class="selection-region"></div>
+            <div class="side-panel">
+                <div class="panel">
+                    <h3><i class="fas fa-layer-group"></i> Media Clips</h3>
+                    <div class="btn-row">
+                        <button id="addMediaBtn" class="primary"><i class="fas fa-plus"></i> Ongeza</button>
+                        <button id="clearMediaBtn" class="danger"><i class="fas fa-trash"></i> Futa</button>
+                        <button id="sortMediaBtn"><i class="fas fa-sort"></i> Panga</button>
+                    </div>
+                    <div id="mediaList" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;max-height:80px;overflow-y:auto;padding:2px;"></div>
+                    <label style="margin-top:4px;">Clip Effect</label>
+                    <select id="clipEffect">
+                        <option value="none">None</option>
+                        <option value="fade">Fade</option>
+                        <option value="zoom">Zoom In</option>
+                        <option value="kenburns">Ken Burns</option>
+                        <option value="slide">Slide</option>
+                        <option value="pulse">Pulse</option>
+                        <option value="vibrant">Vibrant</option>
+                        <option value="bounce">Bounce</option>
+                        <option value="glitch">Glitch</option>
+                        <option value="matrix">Matrix</option>
+                    </select>
                 </div>
-                <div class="transport">
-                    <button id="playBtn" class="play-btn"><i class="fas fa-play"></i></button>
-                    <button id="pauseBtn"><i class="fas fa-pause"></i></button>
-                    <button id="stopPlayBtn"><i class="fas fa-stop"></i></button>
-                    <span id="timeDisplay">00:00.0 / 00:00.0</span>
-                    <button id="deleteRegionBtn" style="background:#ef4444;color:#fff;border:none;padding:5px 12px;border-radius:12px;font-size:0.72rem;cursor:pointer;margin-left:8px">
-                        <i class="fas fa-trash"></i> Futa Sehemu
-                    </button>
+
+                <div class="panel">
+                    <h3><i class="fas fa-font"></i> MrBeast Style Text</h3>
+                    <textarea id="textInput" placeholder="Andika text... (e.g. SUBSCRIBE!)" style="min-height:38px;"></textarea>
+                    <div style="display:flex;gap:4px;">
+                        <select id="textFont" style="flex:1;">
+                            <option value="Arial Black">Arial Black</option>
+                            <option value="Impact">Impact</option>
+                            <option value="Oswald">Oswald</option>
+                            <option value="Bebas Neue">Bebas Neue</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Verdana">Verdana</option>
+                        </select>
+                        <input type="number" id="textSize" value="62" min="18" max="200" style="width:50px;">
+                    </div>
+                    <div class="color-row">
+                        <input type="color" id="textColor" value="#ffffff">
+                        <input type="color" id="textBg" value="#000000">
+                        <input type="color" id="textStroke" value="#ffd700">
+                    </div>
+                    <div class="check-row">
+                        <label><input type="checkbox" id="textBold" checked> Bold</label>
+                        <label><input type="checkbox" id="textBgEnable"> Background</label>
+                        <label><input type="checkbox" id="textStrokeEnable" checked> Stroke</label>
+                        <label><input type="checkbox" id="textShadowEnable" checked> Shadow</label>
+                    </div>
+                    <label>Text Animation</label>
+                    <select id="textAnimation">
+                        <option value="none">None</option>
+                        <option value="pop">Pop In (MrBeast)</option>
+                        <option value="bounce">Bounce</option>
+                        <option value="slideup">Slide Up</option>
+                        <option value="fade">Fade In</option>
+                        <option value="zoom">Zoom</option>
+                        <option value="glow">Glow</option>
+                        <option value="shake">Shake</option>
+                        <option value="wave">Wave</option>
+                        <option value="elastic">Elastic</option>
+                        <option value="typing">Typing</option>
+                        <option value="matrixrain">Matrix Rain</option>
+                    </select>
+                    <div class="btn-row" style="margin-top:4px;">
+                        <button id="addTextBtn" class="primary"><i class="fas fa-plus"></i> Add Text</button>
+                        <button id="clearTextBtn" class="danger"><i class="fas fa-trash"></i> Clear</button>
+                        <button id="duplicateTextBtn"><i class="fas fa-copy"></i> Duplicate</button>
+                    </div>
+                    <div id="textList" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;max-height:50px;overflow-y:auto;"></div>
                 </div>
-                <div class="controls">
-                    <label>Thresh <input type="range" id="thresholdSlider" min="30" max="55" value="45"></label>
-                    <label>MinSil <input type="range" id="minSilenceSlider" min="300" max="900" value="500"></label>
-                    <label>Pad <input type="range" id="paddingSlider" min="20" max="100" value="50"></label>
-                    <label>Boost <input type="range" id="boostSlider" min="120" max="220" value="160"></label>
+
+                <div class="panel">
+                    <h3><i class="fas fa-rocket"></i> Export Viral</h3>
+                    <div class="btn-row">
+                        <button id="exportVideoBtn2" class="success"><i class="fas fa-video"></i> Video (WebM)</button>
+                        <button id="exportWavBtn"><i class="fas fa-file-audio"></i> WAV</button>
+                        <button id="exportMp4Btn" class="primary"><i class="fas fa-film"></i> MP4 (TikTok)</button>
+                    </div>
+                    <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;">
+                        <label style="font-size:0.55rem;color:#94a3b8;">Quality</label>
+                        <select id="exportQuality" style="font-size:0.6rem;padding:2px 6px;background:#020617;border:1px solid #1a2538;color:#e2e8f0;border-radius:4px;">
+                            <option value="high">High</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                        <label style="font-size:0.55rem;color:#94a3b8;margin-left:4px;">FPS</label>
+                        <select id="exportFps" style="font-size:0.6rem;padding:2px 6px;background:#020617;border:1px solid #1a2538;color:#e2e8f0;border-radius:4px;">
+                            <option value="24">24</option>
+                            <option value="30" selected>30</option>
+                            <option value="60">60</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="side-panel">
-            <div class="panel">
-                <h3><i class="fas fa-images"></i> Picha</h3>
-                <div class="btn-row">
-                    <button id="addImageBtn" class="primary">Ongeza</button>
-                    <button id="clearImagesBtn" class="danger">Futa Zote</button>
-                </div>
-                <div class="image-list" id="imageList"></div>
-                <label style="margin-top:6px">Effect ya Picha</label>
-                <select id="imageEffect">
-                    <option value="none">None</option>
-                    <option value="fade">Fade</option>
-                    <option value="zoom">Zoom In</option>
-                    <option value="kenburns">Ken Burns</option>
-                    <option value="slide">Slide</option>
-                    <option value="pulse">Pulse</option>
-                    <option value="vibrant">Vibrant</option>
-                </select>
-            </div>
-
-            <div class="panel">
-                <h3><i class="fas fa-font"></i> Text</h3>
-                <textarea id="textInput" placeholder="Andika text..."></textarea>
-                <div style="display:flex;gap:5px">
-                    <select id="textFont" style="flex:1">
-                        <option value="Arial Black">Arial Black</option>
-                        <option value="Impact">Impact</option>
-                        <option value="Georgia">Georgia</option>
-                    </select>
-                    <input type="number" id="textSize" value="52" min="18" max="140" style="width:55px">
-                </div>
-                <input type="color" id="textColor" value="#ffffff" style="width:100%;height:28px;margin-bottom:5px">
-                <label><input type="checkbox" id="textBold" checked> Bold</label>
-                <div class="btn-row">
-                    <button id="addTextBtn" class="primary">Ongeza Text</button>
-                    <button id="clearTextBtn" class="danger">Futa</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h3><i class="fas fa-download"></i> Pakua</h3>
-                <div class="btn-row">
-                    <button id="exportVideoBtn" class="success"><i class="fas fa-video"></i> Video</button>
-                    <button id="exportWavBtn"><i class="fas fa-file-audio"></i> WAV</button>
-                </div>
-            </div>
+        <div class="info-bar">
+            <span><i class="fas fa-mouse-pointer"></i> <b>Select:</b> Drag on waveform to select · <b>Delete:</b> Remove selected · <b>Split:</b> Cut at selection · <b>Move:</b> Drag selection to reposition</span>
+            <span><i class="fas fa-headphones"></i> <b>Audio:</b> Click playhead to seek · Drag yellow handle</span>
+            <span><i class="fas fa-fire"></i> <b>Viral:</b> Use MrBeast text + Matrix effects + Clean audio</span>
         </div>
     </div>
 
-    <div class="info-bar">
-        Buruta <b>kimshale cha manjano</b> kwenye waveform → achilia → itacheza kutoka pale. Undo / Redo zinapatikana.
-    </div>
-</div>
+    <script>
+        (function() {
+            'use strict';
 
-<script>
-(function(){
-    // ========== CORE VARIABLES ==========
-    const waveCanvas = document.getElementById('waveCanvas');
-    const wctx = waveCanvas.getContext('2d');
-    const previewCanvas = document.getElementById('previewCanvas');
-    const pctx = previewCanvas.getContext('2d');
-    const container = document.getElementById('wave-container');
-    const playheadEl = document.getElementById('playhead');
+            // DOM refs
+            const previewCanvas = document.getElementById('previewCanvas');
+            const pctx = previewCanvas.getContext('2d');
+            const waveCanvas = document.getElementById('waveCanvas');
+            const wctx = waveCanvas.getContext('2d');
+            const container = document.getElementById('wave-container');
+            const playheadEl = document.getElementById('playhead');
+            const dragSelEl = document.getElementById('dragSelection');
+            const selHandleLeft = document.getElementById('selHandleLeft');
+            const selHandleRight = document.getElementById('selHandleRight');
 
-    let audioCtx = null;
-    let originalBuffer = null;
-    let audioBuffer = null;
-    let source = null;
-    let isPlaying = false;
-    let startTime = 0;
-    let pauseOffset = 0;
-    let currentTime = 0;
-    let animId = null;
+            // State
+            let audioCtx = null;
+            let originalBuffer = null;
+            let audioBuffer = null;
+            let source = null;
+            let isPlaying = false;
+            let startTime = 0;
+            let pauseOffset = 0;
+            let currentTime = 0;
+            let animId = null;
+            let isDraggingPlayhead = false;
 
-    let images = [];
-    let textOverlays = [];
-    let selectedTextIdx = -1;
+            let mediaClips = [];
+            let textOverlays = [];
+            let selectedTextIdx = -1;
+            let isDraggingText = false;
+            let dragOffset = { x: 0, y: 0 };
 
-    // History for Undo/Redo
-    let history = [];
-    let historyIndex = -1;
+            let history = [];
+            let historyIndex = -1;
+            let isRecording = false;
+            let mediaRecorder = null;
+            let recordedChunks = [];
+            let recordingStream = null;
 
-    // Playhead drag
-    let isDraggingPlayhead = false;
+            // Selection state (in seconds)
+            let selStart = null;
+            let selEnd = null;
+            let isSelecting = false;
+            let isMoveMode = false;
+            let isDraggingSel = false;
+            let dragSelOffset = 0;
 
-    function initAudio(){
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        return audioCtx;
-    }
-
-    function formatTime(t){
-        const m = Math.floor(t / 60);
-        const s = Math.floor(t % 60);
-        const ms = Math.floor((t % 1) * 10);
-        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${ms}`;
-    }
-
-    // ========== HISTORY (Undo / Redo) ==========
-    function saveState(){
-        // Keep only audio buffer history for reliability
-        if(!audioBuffer) return;
-        const copy = audioCtx.createBuffer(1, audioBuffer.length, audioBuffer.sampleRate);
-        copy.copyToChannel(audioBuffer.getChannelData(0).slice(0), 0);
-        
-        // Remove future states if we are not at the end
-        history = history.slice(0, historyIndex + 1);
-        history.push(copy);
-        historyIndex = history.length - 1;
-        
-        // Limit history size
-        if(history.length > 20){
-            history.shift();
-            historyIndex--;
-        }
-        updateUndoRedoButtons();
-    }
-
-    function undo(){
-        if(historyIndex <= 0) return;
-        historyIndex--;
-        loadAudio(history[historyIndex], false);
-        document.getElementById('statusDisplay').textContent = 'Undo';
-        updateUndoRedoButtons();
-    }
-
-    function redo(){
-        if(historyIndex >= history.length - 1) return;
-        historyIndex++;
-        loadAudio(history[historyIndex], false);
-        document.getElementById('statusDisplay').textContent = 'Redo';
-        updateUndoRedoButtons();
-    }
-
-    function updateUndoRedoButtons(){
-        document.getElementById('undoBtn').disabled = historyIndex <= 0;
-        document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
-    }
-
-    // ========== AUDIO LOAD & WAVEFORM ==========
-    function loadAudio(buffer, storeOriginal = true){
-        if(storeOriginal) originalBuffer = buffer;
-        audioBuffer = buffer;
-        renderWaveform(buffer);
-        updateTimeDisplay();
-        pauseOffset = 0;
-        currentTime = 0;
-        playheadEl.style.left = '0%';
-        if(isPlaying) stopPlayback();
-        document.getElementById('statusDisplay').textContent = 'Imepakiwa';
-    }
-
-    function renderWaveform(buffer){
-        if(!buffer) return;
-        const data = buffer.getChannelData(0);
-        const width = waveCanvas.width;
-        const height = waveCanvas.height;
-        const step = Math.max(1, Math.floor(data.length / width));
-
-        wctx.fillStyle = '#020617';
-        wctx.fillRect(0, 0, width, height);
-        wctx.beginPath();
-        wctx.strokeStyle = '#60a5fa';
-        wctx.lineWidth = 1.5;
-
-        for(let i = 0; i < width; i++){
-            let min = 1, max = -1;
-            for(let j = 0; j < step; j++){
-                const idx = i * step + j;
-                if(idx < data.length){
-                    const v = data[idx];
-                    if(v < min) min = v;
-                    if(v > max) max = v;
-                }
+            // Audio helpers
+            function initAudio() {
+                if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                return audioCtx;
             }
-            const y1 = height/2 - max * height * 0.42;
-            const y2 = height/2 - min * height * 0.42;
-            wctx.moveTo(i, y1);
-            wctx.lineTo(i, y2);
-        }
-        wctx.stroke();
-    }
 
-    // ========== PLAYBACK ==========
-    function playAudio(fromTime = null){
-        if(!audioBuffer) return;
-        initAudio();
-        if(audioCtx.state === 'suspended') audioCtx.resume();
+            function formatTime(t) {
+                if (!t || isNaN(t)) t = 0;
+                const m = Math.floor(t / 60);
+                const s = Math.floor(t % 60);
+                const ms = Math.floor((t % 1) * 10);
+                return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${ms}`;
+            }
 
-        if(isPlaying){
-            source.stop();
-            isPlaying = false;
-        }
+            // History
+            function saveState() {
+                if (!audioBuffer) return;
+                try {
+                    const copy = audioCtx.createBuffer(1, audioBuffer.length, audioBuffer.sampleRate);
+                    copy.copyToChannel(audioBuffer.getChannelData(0).slice(0), 0);
+                    history = history.slice(0, historyIndex + 1);
+                    history.push(copy);
+                    historyIndex = history.length - 1;
+                    if (history.length > 25) { history.shift();
+                        historyIndex--; }
+                    updateUndoRedoButtons();
+                } catch (e) { console.warn('Save state error:', e); }
+            }
 
-        if(fromTime !== null){
-            pauseOffset = Math.max(0, Math.min(fromTime, audioBuffer.duration));
-        }
+            function undo() {
+                if (historyIndex <= 0) return;
+                historyIndex--;
+                loadAudio(history[historyIndex], false);
+                setStatus('Undo');
+                updateUndoRedoButtons();
+                clearSelection();
+            }
 
-        source = audioCtx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioCtx.destination);
-        source.start(0, pauseOffset);
-        startTime = audioCtx.currentTime - pauseOffset;
-        isPlaying = true;
-        document.getElementById('playBtn').innerHTML = '<i class="fas fa-pause"></i>';
-        updatePlayhead();
-    }
+            function redo() {
+                if (historyIndex >= history.length - 1) return;
+                historyIndex++;
+                loadAudio(history[historyIndex], false);
+                setStatus('Redo');
+                updateUndoRedoButtons();
+                clearSelection();
+            }
 
-    function pausePlayback(){
-        if(!isPlaying) return;
-        source.stop();
-        isPlaying = false;
-        pauseOffset = audioCtx.currentTime - startTime;
-        cancelAnimationFrame(animId);
-        document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
-    }
+            function updateUndoRedoButtons() {
+                document.getElementById('undoBtn').disabled = historyIndex <= 0;
+                document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+            }
 
-    function stopPlayback(){
-        if(source) try{ source.stop(); }catch(e){}
-        isPlaying = false;
-        pauseOffset = 0;
-        currentTime = 0;
-        cancelAnimationFrame(animId);
-        playheadEl.style.left = '0%';
-        updateTimeDisplay();
-        document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
-    }
+            function setStatus(msg, isGood = true) {
+                const el = document.getElementById('statusDisplay');
+                el.innerHTML = (isGood ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> ' :
+                    '<i class="fas fa-exclamation-circle" style="color:#f59e0b;"></i> ') + msg;
+            }
 
-    function updatePlayhead(){
-        if(!isPlaying || !audioBuffer) return;
-        currentTime = Math.min(audioCtx.currentTime - startTime, audioBuffer.duration);
-        const pct = (currentTime / audioBuffer.duration) * 100;
-        playheadEl.style.left = pct + '%';
-        updateTimeDisplay();
+            // Audio load
+            function loadAudio(buffer, storeOriginal = true) {
+                if (storeOriginal) originalBuffer = buffer;
+                audioBuffer = buffer;
+                renderWaveform(buffer);
+                updateTimeDisplay();
+                pauseOffset = 0;
+                currentTime = 0;
+                playheadEl.style.left = '0%';
+                if (isPlaying) stopPlayback();
+                setStatus('Audio imepakiwa');
+                drawPreviewFrame(0);
+                clearSelection();
+            }
 
-        if(currentTime >= audioBuffer.duration - 0.05){
-            stopPlayback();
-            return;
-        }
-        animId = requestAnimationFrame(updatePlayhead);
-    }
-
-    function updateTimeDisplay(){
-        const dur = audioBuffer ? audioBuffer.duration : 0;
-        document.getElementById('timeDisplay').textContent = 
-            `${formatTime(Math.min(currentTime, dur))} / ${formatTime(dur)}`;
-    }
-
-    // ========== PLAYHEAD DRAG (Muhimu sana) ==========
-    function getTimeFromX(clientX){
-        const rect = container.getBoundingClientRect();
-        let pct = (clientX - rect.left) / rect.width;
-        pct = Math.max(0, Math.min(1, pct));
-        return pct * (audioBuffer ? audioBuffer.duration : 0);
-    }
-
-    playheadEl.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        isDraggingPlayhead = true;
-        if(isPlaying) pausePlayback();
-    });
-
-    container.addEventListener('mousedown', (e) => {
-        if(!audioBuffer) return;
-        // Click anywhere on waveform to move playhead
-        const time = getTimeFromX(e.clientX);
-        currentTime = time;
-        pauseOffset = time;
-        playheadEl.style.left = (time / audioBuffer.duration * 100) + '%';
-        updateTimeDisplay();
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        if(!isDraggingPlayhead || !audioBuffer) return;
-        const time = getTimeFromX(e.clientX);
-        currentTime = time;
-        pauseOffset = time;
-        playheadEl.style.left = (time / audioBuffer.duration * 100) + '%';
-        updateTimeDisplay();
-    });
-
-    window.addEventListener('mouseup', () => {
-        if(isDraggingPlayhead){
-            isDraggingPlayhead = false;
-            // Optional: auto play from new position
-            // playAudio(pauseOffset);
-        }
-    });
-
-    // ========== SILENCE REMOVAL ==========
-    function aiRemoveSilence(buffer){
-        if(!buffer) return buffer;
-        const data = buffer.getChannelData(0);
-        const rate = buffer.sampleRate;
-        const threshold = Math.pow(10, -45/20);
-        const minSilence = Math.floor(0.5 * rate);
-        const padding = Math.floor(0.05 * rate);
-        const fade = Math.floor(0.012 * rate);
-        const win = Math.floor(rate * 0.02);
-
-        let segments = [];
-        let inSound = false, soundStart = 0, silenceStart = 0;
-
-        for(let i=0; i<data.length; i+=Math.floor(win/2)){
-            let sum = 0;
-            const end = Math.min(i+win, data.length);
-            for(let j=i;j<end;j++) sum += data[j]*data[j];
-            const energy = Math.sqrt(sum / (end-i));
-
-            if(energy > threshold){
-                if(!inSound){
-                    inSound = true;
-                    soundStart = Math.max(0, i - padding);
-                }
-            } else {
-                if(inSound){
-                    if(i - silenceStart > minSilence){
-                        segments.push({start: soundStart, end: Math.min(data.length, silenceStart + padding)});
-                        inSound = false;
+            // Waveform
+            function renderWaveform(buffer) {
+                if (!buffer) return;
+                const data = buffer.getChannelData(0);
+                const width = waveCanvas.width;
+                const height = waveCanvas.height;
+                const step = Math.max(1, Math.floor(data.length / width));
+                wctx.fillStyle = '#020617';
+                wctx.fillRect(0, 0, width, height);
+                wctx.beginPath();
+                wctx.strokeStyle = '#60a5fa';
+                wctx.lineWidth = 1.5;
+                for (let i = 0; i < width; i++) {
+                    let min = 1,
+                        max = -1;
+                    for (let j = 0; j < step; j++) {
+                        const idx = i * step + j;
+                        if (idx < data.length) {
+                            const v = data[idx];
+                            if (v < min) min = v;
+                            if (v > max) max = v;
+                        }
                     }
-                    silenceStart = i;
+                    wctx.moveTo(i, height / 2 - max * height * 0.42);
+                    wctx.lineTo(i, height / 2 - min * height * 0.42);
                 }
+                wctx.stroke();
+                wctx.strokeStyle = 'rgba(96,165,250,0.15)';
+                wctx.lineWidth = 1;
+                wctx.beginPath();
+                wctx.moveTo(0, height / 2);
+                wctx.lineTo(width, height / 2);
+                wctx.stroke();
+                updateSelectionUI();
             }
-        }
-        if(inSound) segments.push({start: soundStart, end: data.length});
 
-        if(segments.length === 0) return buffer;
-
-        let newData = [];
-        segments.forEach((seg, idx) => {
-            let part = Array.from(data.slice(seg.start, seg.end));
-            // fade
-            for(let i=0;i<Math.min(fade, part.length);i++){
-                part[i] *= i/fade;
-                part[part.length-1-i] *= i/fade;
-            }
-            if(idx > 0){
-                const cf = Math.min(fade, part.length, newData.length);
-                for(let i=0;i<cf;i++){
-                    const t = i/cf;
-                    newData[newData.length-cf+i] = newData[newData.length-cf+i]*(1-t) + part[i]*t;
+            // Playback
+            function playAudio(fromTime) {
+                if (!audioBuffer) return;
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                if (isPlaying) { try { source.stop(); } catch (e) {} }
+                if (fromTime !== undefined && fromTime !== null) {
+                    pauseOffset = Math.max(0, Math.min(fromTime, audioBuffer.duration));
                 }
-                newData.push(...part.slice(cf));
-            } else {
-                newData.push(...part);
+                source = audioCtx.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioCtx.destination);
+                source.start(0, pauseOffset);
+                startTime = audioCtx.currentTime - pauseOffset;
+                isPlaying = true;
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-pause"></i>';
+                updatePlayhead();
+                setStatus('Playing...');
             }
-        });
 
-        const nb = audioCtx.createBuffer(1, newData.length, rate);
-        nb.copyToChannel(new Float32Array(newData), 0);
-        return nb;
-    }
+            function pausePlayback() {
+                if (!isPlaying) return;
+                try { source.stop(); } catch (e) {}
+                isPlaying = false;
+                pauseOffset = audioCtx.currentTime - startTime;
+                cancelAnimationFrame(animId);
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
+                setStatus('Paused');
+            }
 
-    // ========== EVENTS ==========
-    document.getElementById('playBtn').onclick = () => {
-        if(isPlaying) pausePlayback();
-        else playAudio();
-    };
-    document.getElementById('pauseBtn').onclick = pausePlayback;
-    document.getElementById('stopPlayBtn').onclick = stopPlayback;
-
-    document.getElementById('undoBtn').onclick = undo;
-    document.getElementById('redoBtn').onclick = redo;
-
-    document.getElementById('uploadAudioBtn').onclick = () => document.getElementById('audioInput').click();
-    document.getElementById('audioInput').onchange = async (e) => {
-        const f = e.target.files[0];
-        if(!f) return;
-        initAudio();
-        const buf = await audioCtx.decodeAudioData(await f.arrayBuffer());
-        loadAudio(buf);
-        saveState();
-    };
-
-    document.getElementById('autoRemoveBtn').onclick = () => {
-        if(!originalBuffer) return alert('Weka audio kwanza');
-        saveState();
-        const result = aiRemoveSilence(originalBuffer);
-        loadAudio(result, false);
-        document.getElementById('statusDisplay').textContent = 'Silence imeondolewa';
-    };
-
-    document.getElementById('enhanceBtn').onclick = () => {
-        if(!audioBuffer) return;
-        saveState();
-        // simple boost
-        const data = audioBuffer.getChannelData(0);
-        const out = new Float32Array(data.length);
-        const boost = 1.6;
-        for(let i=0;i<data.length;i++){
-            let s = data[i] * boost;
-            out[i] = Math.max(-0.95, Math.min(0.95, s));
-        }
-        const nb = audioCtx.createBuffer(1, data.length, audioBuffer.sampleRate);
-        nb.copyToChannel(out, 0);
-        loadAudio(nb, false);
-        document.getElementById('statusDisplay').textContent = 'Boost imetumika';
-    };
-
-    // Images
-    document.getElementById('addImageBtn').onclick = () => document.getElementById('imageInput').click();
-    document.getElementById('imageInput').onchange = (e) => {
-        Array.from(e.target.files).forEach(file => {
-            const img = new Image();
-            img.onload = () => {
-                images.push({img, name: file.name});
-                renderImageList();
+            function stopPlayback() {
+                if (source) try { source.stop(); } catch (e) {}
+                isPlaying = false;
+                pauseOffset = 0;
+                currentTime = 0;
+                cancelAnimationFrame(animId);
+                playheadEl.style.left = '0%';
+                updateTimeDisplay();
+                document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i>';
                 drawPreviewFrame(0);
-            };
-            img.src = URL.createObjectURL(file);
-        });
-    };
+                setStatus('Stopped');
+            }
 
-    function renderImageList(){
-        const list = document.getElementById('imageList');
-        list.innerHTML = '';
-        images.forEach((item, i) => {
-            const wrap = document.createElement('div');
-            wrap.className = 'thumb-wrap';
-            const thumb = document.createElement('img');
-            thumb.src = item.img.src;
-            thumb.className = 'image-thumb';
-            const del = document.createElement('div');
-            del.className = 'thumb-del';
-            del.innerHTML = '×';
-            del.onclick = (e) => {
+            function updatePlayhead() {
+                if (!isPlaying || !audioBuffer) return;
+                currentTime = Math.min(audioCtx.currentTime - startTime, audioBuffer.duration);
+                const pct = (currentTime / audioBuffer.duration * 100);
+                playheadEl.style.left = pct + '%';
+                updateTimeDisplay();
+                drawPreviewFrame(currentTime);
+                if (currentTime >= audioBuffer.duration - 0.05) { stopPlayback(); return; }
+                animId = requestAnimationFrame(updatePlayhead);
+            }
+
+            function updateTimeDisplay() {
+                const dur = audioBuffer ? audioBuffer.duration : 0;
+                let txt = `${formatTime(Math.min(currentTime || 0, dur))} / ${formatTime(dur)}`;
+                if (selStart !== null && selEnd !== null && selStart < selEnd) {
+                    txt += ` | Sel: ${formatTime(selStart)} - ${formatTime(selEnd)} (${formatTime(selEnd-selStart)})`;
+                }
+                document.getElementById('timeDisplay').textContent = txt;
+            }
+
+            // Get time from X position
+            function getTimeFromX(clientX) {
+                const rect = container.getBoundingClientRect();
+                let pct = (clientX - rect.left) / rect.width;
+                pct = Math.max(0, Math.min(1, pct));
+                return pct * (audioBuffer ? audioBuffer.duration : 0);
+            }
+
+            function getXFromTime(time) {
+                if (!audioBuffer) return 0;
+                return (time / audioBuffer.duration) * container.getBoundingClientRect().width;
+            }
+
+            // ===== SELECTION DRAG ON WAVEFORM =====
+            let selDragStartX = 0;
+            let selDragStartTime = 0;
+            let isDraggingSelection = false;
+
+            container.addEventListener('mousedown', e => {
+                if (!audioBuffer) return;
+                if (e.target.closest('.sel-handle')) return;
+                if (isDraggingPlayhead) return;
+
+                const time = getTimeFromX(e.clientX);
+                // If in move mode and selection exists, start dragging the selection
+                if (isMoveMode && selStart !== null && selEnd !== null && time >= selStart && time <= selEnd) {
+                    isDraggingSel = true;
+                    dragSelOffset = time - selStart;
+                    container.style.cursor = 'grabbing';
+                    setStatus('Hamisha sehemu iliyochaguliwa...');
+                    return;
+                }
+
+                // Start new selection
+                selDragStartX = e.clientX;
+                selDragStartTime = time;
+                selStart = time;
+                selEnd = time;
+                isSelecting = true;
+                isDraggingSelection = true;
+                setStatus(`Chagua: ${formatTime(time)}`);
+                updateSelectionUI();
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (!audioBuffer) return;
+
+                // Dragging selection to move
+                if (isDraggingSel && isMoveMode) {
+                    const rect = container.getBoundingClientRect();
+                    let pct = (e.clientX - rect.left) / rect.width;
+                    pct = Math.max(0, Math.min(1, pct));
+                    const newTime = pct * audioBuffer.duration;
+                    const selLen = selEnd - selStart;
+                    let newStart = newTime - dragSelOffset;
+                    let newEnd = newStart + selLen;
+                    // Clamp
+                    if (newStart < 0) { newStart = 0;
+                        newEnd = selLen; }
+                    if (newEnd > audioBuffer.duration) { newEnd = audioBuffer.duration;
+                        newStart = audioBuffer.duration - selLen; }
+                    if (newStart < 0) newStart = 0;
+                    // Only update if different
+                    if (Math.abs(newStart - selStart) > 0.01) {
+                        // Move the selection
+                        const data = audioBuffer.getChannelData(0);
+                        const rate = audioBuffer.sampleRate;
+                        const oldStartIdx = Math.floor(selStart * rate);
+                        const oldEndIdx = Math.floor(selEnd * rate);
+                        const newStartIdx = Math.floor(newStart * rate);
+                        const newEndIdx = Math.floor(newEnd * rate);
+                        const len = oldEndIdx - oldStartIdx;
+                        if (oldStartIdx < 0 || oldEndIdx > data.length || len <= 0) return;
+
+                        // Extract the selected portion
+                        const selData = new Float32Array(len);
+                        for (let i = 0; i < len; i++) {
+                            selData[i] = data[oldStartIdx + i];
+                        }
+
+                        // Remove old selection from data
+                        const remaining = data.length - len;
+                        const newData = new Float32Array(remaining);
+                        for (let i = 0; i < oldStartIdx; i++) newData[i] = data[i];
+                        for (let i = oldEndIdx; i < data.length; i++) {
+                            newData[i - len] = data[i];
+                        }
+
+                        // Insert at new position
+                        const insertPos = Math.max(0, Math.min(newStartIdx, newData.length));
+                        const finalData = new Float32Array(newData.length + len);
+                        for (let i = 0; i < insertPos; i++) finalData[i] = newData[i];
+                        for (let i = 0; i < len; i++) finalData[insertPos + i] = selData[i];
+                        for (let i = insertPos; i < newData.length; i++) {
+                            finalData[i + len] = newData[i];
+                        }
+
+                        const nb = audioCtx.createBuffer(1, finalData.length, rate);
+                        nb.copyToChannel(finalData, 0);
+                        // Update selection times
+                        const newSelStart = insertPos / rate;
+                        const newSelEnd = (insertPos + len) / rate;
+                        loadAudio(nb, false);
+                        selStart = newSelStart;
+                        selEnd = newSelEnd;
+                        updateSelectionUI();
+                        updateTimeDisplay();
+                        setStatus(`Hamisha: ${formatTime(newSelStart)} - ${formatTime(newSelEnd)}`);
+                        saveState();
+                    }
+                    return;
+                }
+
+                if (!isDraggingSelection) return;
+                const time = getTimeFromX(e.clientX);
+                if (time < selDragStartTime) {
+                    selStart = time;
+                    selEnd = selDragStartTime;
+                } else {
+                    selStart = selDragStartTime;
+                    selEnd = time;
+                }
+                // Clamp
+                if (selStart < 0) selStart = 0;
+                if (selEnd > audioBuffer.duration) selEnd = audioBuffer.duration;
+                if (selEnd - selStart < 0.01) {
+                    selEnd = selStart + 0.01;
+                }
+                updateSelectionUI();
+                updateTimeDisplay();
+                setStatus(`Chagua: ${formatTime(selStart)} - ${formatTime(selEnd)} (${formatTime(selEnd-selStart)})`);
+                // Update playhead to show position
+                currentTime = time;
+                pauseOffset = time;
+                playheadEl.style.left = (time / audioBuffer.duration * 100) + '%';
+            });
+
+            window.addEventListener('mouseup', e => {
+                if (isDraggingSelection) {
+                    isDraggingSelection = false;
+                    isSelecting = false;
+                    if (selStart !== null && selEnd !== null && Math.abs(selEnd - selStart) > 0.05) {
+                        setStatus(`✅ Sehemu imechaguliwa: ${formatTime(selStart)} - ${formatTime(selEnd)}`);
+                    } else {
+                        clearSelection();
+                        setStatus('Uchaguzi ulighairiwa (sehemu fupi sana)');
+                    }
+                    updateSelectionUI();
+                }
+                if (isDraggingSel) {
+                    isDraggingSel = false;
+                    container.style.cursor = 'default';
+                    setStatus('Hamisha imekamilika');
+                }
+            });
+
+            // ===== SELECTION UI =====
+            function updateSelectionUI() {
+                if (!audioBuffer) {
+                    dragSelEl.style.display = 'none';
+                    return;
+                }
+                const dur = audioBuffer.duration;
+                if (selStart !== null && selEnd !== null && selStart < selEnd && selEnd - selStart > 0.01) {
+                    const startPct = (selStart / dur) * 100;
+                    const endPct = (selEnd / dur) * 100;
+                    dragSelEl.style.left = startPct + '%';
+                    dragSelEl.style.width = (endPct - startPct) + '%';
+                    dragSelEl.style.display = 'block';
+                    // Update handles visibility
+                    selHandleLeft.style.display = 'block';
+                    selHandleRight.style.display = 'block';
+                } else {
+                    dragSelEl.style.display = 'none';
+                }
+                // Update move mode indicator
+                if (isMoveMode) {
+                    container.classList.add('move-mode-active');
+                } else {
+                    container.classList.remove('move-mode-active');
+                }
+            }
+
+            function clearSelection() {
+                selStart = null;
+                selEnd = null;
+                isSelecting = false;
+                isDraggingSelection = false;
+                updateSelectionUI();
+                updateTimeDisplay();
+                setStatus('Uchaguzi umeondolewa.');
+            }
+
+            // ===== DELETE SELECTION =====
+            function deleteSelection() {
+                if (!audioBuffer) return alert('Hakuna audio.');
+                if (selStart === null || selEnd === null || selStart >= selEnd || selEnd - selStart < 0.05) {
+                    alert('Chagua sehemu kwanza kwa kuburuta kwenye wimbi.');
+                    return;
+                }
+                saveState();
+                const data = audioBuffer.getChannelData(0);
+                const rate = audioBuffer.sampleRate;
+                const startIdx = Math.floor(selStart * rate);
+                const endIdx = Math.floor(selEnd * rate);
+                if (startIdx < 0 || endIdx > data.length || startIdx >= endIdx) return;
+                const newLen = data.length - (endIdx - startIdx);
+                if (newLen < 100) { alert('Sehemu iliyobaki ni fupi sana.'); return; }
+                const out = new Float32Array(newLen);
+                for (let i = 0; i < startIdx; i++) out[i] = data[i];
+                for (let i = endIdx; i < data.length; i++) {
+                    out[startIdx + (i - endIdx)] = data[i];
+                }
+                const nb = audioCtx.createBuffer(1, newLen, rate);
+                nb.copyToChannel(out, 0);
+                loadAudio(nb, false);
+                clearSelection();
+                setStatus('🗑 Sehemu iliyochaguliwa imefutwa.');
+                saveState();
+            }
+
+            // ===== SPLIT SELECTION =====
+            function splitSelection() {
+                if (!audioBuffer) return alert('Hakuna audio.');
+                if (selStart === null || selEnd === null || selStart >= selEnd || selEnd - selStart < 0.05) {
+                    alert('Chagua sehemu kwanza kwa kuburuta kwenye wimbi.');
+                    return;
+                }
+                saveState();
+                setStatus(`✂️ Sehemu imegawanywa. Unaweza kuihamisha sasa.`);
+                updateSelectionUI();
+            }
+
+            // ===== TOGGLE MOVE MODE =====
+            function toggleMoveMode() {
+                isMoveMode = !isMoveMode;
+                const btn = document.getElementById('moveToggleBtn');
+                if (isMoveMode) {
+                    btn.classList.add('active');
+                    btn.style.background = '#f59e0b';
+                    btn.style.borderColor = '#f59e0b';
+                    btn.innerHTML = '<i class="fas fa-arrows-alt-h"></i> Hamisha (ON)';
+                    setStatus('🔀 Mode ya kuhamisha imewashwa. Buruta sehemu iliyochaguliwa.');
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.background = '#10b981';
+                    btn.style.borderColor = '#10b981';
+                    btn.innerHTML = '<i class="fas fa-arrows-alt-h"></i> Hamisha';
+                    setStatus('Mode ya kuhamisha imezimwa.');
+                }
+                updateSelectionUI();
+            }
+
+            // ===== HANDLE DRAG FOR SELECTION BOUNDARIES =====
+            let isDraggingHandle = false;
+            let handleSide = 'left';
+
+            selHandleLeft.addEventListener('mousedown', e => {
                 e.stopPropagation();
-                images.splice(i, 1);
-                renderImageList();
-                drawPreviewFrame(0);
-            };
-            wrap.appendChild(thumb);
-            wrap.appendChild(del);
-            list.appendChild(wrap);
-        });
-    }
+                if (!audioBuffer || selStart === null || selEnd === null) return;
+                isDraggingHandle = true;
+                handleSide = 'left';
+                container.style.cursor = 'ew-resize';
+            });
 
-    // Text
-    document.getElementById('addTextBtn').onclick = () => {
-        const text = document.getElementById('textInput').value.trim();
-        if(!text) return;
-        textOverlays.push({
-            text,
-            font: document.getElementById('textFont').value,
-            size: parseInt(document.getElementById('textSize').value) || 52,
-            color: document.getElementById('textColor').value,
-            bold: document.getElementById('textBold').checked,
-            x: previewCanvas.width / 2,
-            y: previewCanvas.height * 0.75,
-            scale: 1,
-            rotation: 0
-        });
-        drawPreviewFrame(0);
-    };
+            selHandleRight.addEventListener('mousedown', e => {
+                e.stopPropagation();
+                if (!audioBuffer || selStart === null || selEnd === null) return;
+                isDraggingHandle = true;
+                handleSide = 'right';
+                container.style.cursor = 'ew-resize';
+            });
 
-    // Preview draw (simplified)
-    function drawPreviewFrame(time){
-        const w = previewCanvas.width;
-        const h = previewCanvas.height;
-        pctx.fillStyle = '#000';
-        pctx.fillRect(0, 0, w, h);
+            window.addEventListener('mousemove', e => {
+                if (!isDraggingHandle || !audioBuffer) return;
+                const time = getTimeFromX(e.clientX);
+                if (handleSide === 'left') {
+                    if (time < selEnd - 0.05) {
+                        selStart = Math.max(0, time);
+                    }
+                } else {
+                    if (time > selStart + 0.05) {
+                        selEnd = Math.min(audioBuffer.duration, time);
+                    }
+                }
+                updateSelectionUI();
+                updateTimeDisplay();
+                setStatus(`Chagua: ${formatTime(selStart)} - ${formatTime(selEnd)}`);
+            });
 
-        if(images.length > 0){
-            const duration = audioBuffer ? audioBuffer.duration : 6;
-            const idx = Math.min(images.length-1, Math.floor((time / duration) * images.length));
-            const imgObj = images[idx].img;
-            if(imgObj && imgObj.complete){
-                const scale = Math.max(w / imgObj.width, h / imgObj.height);
-                const iw = imgObj.width * scale;
-                const ih = imgObj.height * scale;
-                pctx.drawImage(imgObj, (w-iw)/2, (h-ih)/2, iw, ih);
+            window.addEventListener('mouseup', () => {
+                if (isDraggingHandle) {
+                    isDraggingHandle = false;
+                    container.style.cursor = 'default';
+                }
+            });
+
+            // Playhead drag (existing)
+            playheadEl.addEventListener('mousedown', e => {
+                e.stopPropagation();
+                isDraggingPlayhead = true;
+                if (isPlaying) pausePlayback();
+            });
+
+            container.addEventListener('mousedown', e => {
+                // Already handled above for selection
+            });
+
+            // ===== DRAW PREVIEW =====
+            function drawPreviewFrame(time) {
+                const w = previewCanvas.width;
+                const h = previewCanvas.height;
+                pctx.clearRect(0, 0, w, h);
+                const grad = pctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.7);
+                grad.addColorStop(0, '#0a1628');
+                grad.addColorStop(1, '#000000');
+                pctx.fillStyle = grad;
+                pctx.fillRect(0, 0, w, h);
+
+                if (mediaClips.length > 0 && audioBuffer) {
+                    const duration = audioBuffer.duration;
+                    const total = mediaClips.length;
+                    const clipDur = duration / total;
+                    const idx = Math.min(total - 1, Math.floor((time % duration) / clipDur));
+                    const clip = mediaClips[idx];
+                    if (clip) {
+                        const localTime = ((time % duration) - idx * clipDur) / clipDur;
+                        const effect = document.getElementById('clipEffect').value;
+                        pctx.save();
+                        let img = clip.data;
+                        if (clip.type === 'video' && img) {
+                            try {
+                                if (img.readyState >= 2) {
+                                    const vtime = (time % duration) / duration * (clip.duration || 3);
+                                    if (img.currentTime !== vtime % img.duration) {
+                                        img.currentTime = (vtime % img.duration);
+                                    }
+                                }
+                            } catch (e) {}
+                        }
+                        if (img && (img.complete !== false || clip.type === 'video')) {
+                            const iw = img.videoWidth || img.width || 400;
+                            const ih = img.videoHeight || img.height || 300;
+                            let scale = Math.max(w / iw, h / ih);
+                            let dw = iw * scale;
+                            let dh = ih * scale;
+                            let dx = (w - dw) / 2;
+                            let dy = (h - dh) / 2;
+                            const lt = Math.max(0, Math.min(1, localTime * 1.5));
+                            if (effect === 'zoom') {
+                                const z = 1 + lt * 0.15;
+                                pctx.translate(w / 2, h / 2);
+                                pctx.scale(z, z);
+                                pctx.translate(-w / 2, -h / 2);
+                            } else if (effect === 'kenburns') {
+                                const z = 1 + lt * 0.12;
+                                const tx = (lt - 0.5) * 40;
+                                const ty = (lt - 0.5) * 20;
+                                pctx.translate(w / 2 + tx, h / 2 + ty);
+                                pctx.scale(z, z);
+                                pctx.translate(-w / 2, -h / 2);
+                            } else if (effect === 'slide') {
+                                dx -= lt * 80;
+                            } else if (effect === 'pulse') {
+                                const z = 1 + Math.sin(lt * Math.PI * 3) * 0.04;
+                                pctx.translate(w / 2, h / 2);
+                                pctx.scale(z, z);
+                                pctx.translate(-w / 2, -h / 2);
+                            } else if (effect === 'bounce') {
+                                const z = 1 + Math.abs(Math.sin(lt * Math.PI * 4)) * 0.08;
+                                pctx.translate(w / 2, h / 2);
+                                pctx.scale(z, z);
+                                pctx.translate(-w / 2, -h / 2);
+                            } else if (effect === 'vibrant') {
+                                pctx.filter = 'contrast(1.2) saturate(1.4) brightness(1.05)';
+                            } else if (effect === 'glitch') {
+                                if (lt > 0.3 && lt < 0.7) {
+                                    pctx.filter = 'hue-rotate(' + (lt * 180) + 'deg) contrast(1.3)';
+                                    dx += (Math.random() - 0.5) * 8;
+                                }
+                            } else if (effect === 'matrix') {
+                                pctx.filter = 'hue-rotate(120deg) saturate(2) contrast(1.4) brightness(0.8)';
+                                pctx.shadowColor = '#00ff41';
+                                pctx.shadowBlur = 20;
+                            }
+                            if (effect === 'fade') pctx.globalAlpha = 0.3 + lt * 0.7;
+                            pctx.drawImage(img, dx, dy, dw, dh);
+                            pctx.restore();
+                            pctx.filter = 'none';
+                            pctx.globalAlpha = 1;
+                            pctx.shadowBlur = 0;
+                        } else {
+                            pctx.restore();
+                            pctx.fillStyle = '#0a1628';
+                            pctx.fillRect(0, 0, w, h);
+                            pctx.fillStyle = '#2a364d';
+                            pctx.font = '20px sans-serif';
+                            pctx.textAlign = 'center';
+                            pctx.fillText('📷 Media ' + (idx + 1), w / 2, h / 2);
+                        }
+                    }
+                } else if (mediaClips.length === 0) {
+                    pctx.fillStyle = 'rgba(20,30,50,0.5)';
+                    pctx.fillRect(0, 0, w, h);
+                    pctx.fillStyle = '#3b4b66';
+                    pctx.font = '22px sans-serif';
+                    pctx.textAlign = 'center';
+                    pctx.fillText('📸 Ongeza Picha au Video', w / 2, h / 2 - 10);
+                    pctx.font = '14px sans-serif';
+                    pctx.fillStyle = '#64748b';
+                    pctx.fillText('➕ Bonyeza "Ongeza Media"', w / 2, h / 2 + 30);
+                }
+
+                // Text overlays
+                textOverlays.forEach((t, i) => {
+                    pctx.save();
+                    let scale = t.scale || 1;
+                    let alpha = 1;
+                    let yOff = 0;
+                    let rot = t.rotation || 0;
+                    const anim = t.animation || 'none';
+                    const dur = audioBuffer ? audioBuffer.duration : 5;
+                    const localT = (time % 2.8) / 2.8;
+                    if (anim === 'pop') {
+                        const p = Math.min(localT * 2.5, 1);
+                        scale *= 0.4 + p * 0.6;
+                        if (p > 0.8) { scale *= 1 + Math.sin((p - 0.8) * 20) * 0.06; }
+                    } else if (anim === 'bounce') {
+                        scale *= 1 + Math.sin(localT * Math.PI * 4) * 0.08;
+                    } else if (anim === 'slideup') {
+                        yOff = (1 - Math.min(localT * 2.2, 1)) * 40;
+                    } else if (anim === 'fade') {
+                        alpha = Math.min(localT * 2, 1);
+                    } else if (anim === 'zoom') {
+                        scale *= 0.6 + Math.min(localT * 1.8, 1) * 0.4;
+                    } else if (anim === 'glow') {
+                        pctx.shadowColor = t.color || '#ffd700';
+                        pctx.shadowBlur = 20 + Math.sin(localT * Math.PI * 2) * 12;
+                    } else if (anim === 'shake') {
+                        yOff = Math.sin(localT * 30) * 5;
+                        const xOff = Math.sin(localT * 25 + 1) * 4;
+                        pctx.translate(xOff, 0);
+                    } else if (anim === 'wave') {
+                        yOff = Math.sin(localT * Math.PI * 3) * 6;
+                    } else if (anim === 'elastic') {
+                        const e = Math.sin(localT * Math.PI * 4) * Math.exp(-localT * 2);
+                        scale *= 1 + e * 0.15;
+                    } else if (anim === 'typing') {
+                        const chars = Math.floor(localT * t.text.length);
+                        const displayText = t.text.substring(0, chars) + (chars < t.text.length ? '|' : '');
+                        pctx.globalAlpha = alpha;
+                        pctx.translate(t.x, t.y + yOff);
+                        pctx.rotate(rot);
+                        pctx.scale(scale, Math.abs(scale));
+                        const weight = t.bold ? 'bold' : 'normal';
+                        pctx.font = `${weight} ${t.size}px ${t.font}`;
+                        pctx.textAlign = 'center';
+                        pctx.textBaseline = 'middle';
+                        if (t.strokeEnable) {
+                            pctx.strokeStyle = t.stroke || '#ffd700';
+                            pctx.lineWidth = 4;
+                            pctx.strokeText(displayText, 0, 0);
+                        }
+                        if (t.shadowEnable) {
+                            pctx.shadowColor = 'rgba(0,0,0,0.7)';
+                            pctx.shadowBlur = 12;
+                            pctx.shadowOffsetX = 2;
+                            pctx.shadowOffsetY = 3;
+                        }
+                        if (t.bgEnable) {
+                            const m = pctx.measureText(displayText);
+                            pctx.fillStyle = t.bg || '#000000';
+                            pctx.globalAlpha = 0.65 * alpha;
+                            const pad = 14;
+                            pctx.fillRect(-m.width / 2 - pad, -t.size / 2 - 6, m.width + pad * 2, t.size + 12);
+                            pctx.globalAlpha = alpha;
+                        }
+                        pctx.fillStyle = t.color || '#ffffff';
+                        pctx.fillText(displayText, 0, 0);
+                        pctx.restore();
+                        return;
+                    } else if (anim === 'matrixrain') {
+                        const chars = '0123456789ABCDEF';
+                        let display = '';
+                        for (let i = 0; i < t.text.length; i++) {
+                            const charIdx = Math.floor((localT * 20 + i * 3) % chars.length);
+                            display += chars[charIdx] || '0';
+                        }
+                        pctx.globalAlpha = alpha;
+                        pctx.translate(t.x, t.y + yOff + Math.sin(localT * 10 + i) * 2);
+                        pctx.rotate(rot);
+                        pctx.scale(scale, Math.abs(scale));
+                        const weight = t.bold ? 'bold' : 'normal';
+                        pctx.font = `${weight} ${t.size}px monospace`;
+                        pctx.textAlign = 'center';
+                        pctx.textBaseline = 'middle';
+                        pctx.shadowColor = '#00ff41';
+                        pctx.shadowBlur = 18;
+                        pctx.fillStyle = '#00ff41';
+                        pctx.fillText(display, 0, 0);
+                        pctx.restore();
+                        return;
+                    }
+                    pctx.globalAlpha = alpha;
+                    pctx.translate(t.x, t.y + yOff);
+                    pctx.rotate(rot);
+                    pctx.scale(scale, Math.abs(scale));
+                    const weight = t.bold ? 'bold' : 'normal';
+                    pctx.font = `${weight} ${t.size}px ${t.font}`;
+                    pctx.textAlign = 'center';
+                    pctx.textBaseline = 'middle';
+                    if (t.bgEnable) {
+                        const m = pctx.measureText(t.text);
+                        pctx.fillStyle = t.bg || '#000000';
+                        pctx.globalAlpha = 0.6 * alpha;
+                        const pad = 14;
+                        pctx.fillRect(-m.width / 2 - pad, -t.size / 2 - 6, m.width + pad * 2, t.size + 12);
+                        pctx.globalAlpha = alpha;
+                    }
+                    if (t.strokeEnable) {
+                        pctx.strokeStyle = t.stroke || '#ffd700';
+                        pctx.lineWidth = 4;
+                        pctx.lineJoin = 'round';
+                        pctx.strokeText(t.text, 0, 0);
+                    }
+                    if (t.shadowEnable) {
+                        pctx.shadowColor = 'rgba(0,0,0,0.7)';
+                        pctx.shadowBlur = 14;
+                        pctx.shadowOffsetX = 2;
+                        pctx.shadowOffsetY = 3;
+                    }
+                    pctx.fillStyle = t.color || '#ffffff';
+                    pctx.fillText(t.text, 0, 0);
+                    pctx.restore();
+                });
             }
-        }
 
-        textOverlays.forEach(t => {
-            pctx.save();
-            pctx.translate(t.x, t.y);
-            pctx.scale(t.scale, t.scale);
-            pctx.font = `${t.bold ? 'bold' : 'normal'} ${t.size}px ${t.font}`;
-            pctx.fillStyle = t.color;
-            pctx.textAlign = 'center';
-            pctx.textBaseline = 'middle';
-            pctx.fillText(t.text, 0, 0);
-            pctx.restore();
-        });
-    }
+            // Text dragging
+            previewCanvas.addEventListener('pointerdown', e => {
+                const rect = previewCanvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (previewCanvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (previewCanvas.height / rect.height);
+                let found = -1;
+                for (let i = textOverlays.length - 1; i >= 0; i--) {
+                    const t = textOverlays[i];
+                    const dx = x - t.x;
+                    const dy = y - t.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < 80) { found = i; break; }
+                }
+                if (found >= 0) {
+                    selectedTextIdx = found;
+                    isDraggingText = true;
+                    dragOffset.x = x - textOverlays[found].x;
+                    dragOffset.y = y - textOverlays[found].y;
+                    setStatus('Dragging text: ' + textOverlays[found].text);
+                    previewCanvas.setPointerCapture(e.pointerId);
+                } else {
+                    isDraggingText = false;
+                }
+            });
 
-    function updateCanvasSize(){
-        const res = parseInt(document.getElementById('resSelect').value);
-        const aspect = document.getElementById('aspectSelect').value;
-        let w, h;
-        if(aspect === '16:9'){ w = res === 1080 ? 1920 : res === 720 ? 1280 : 854; h = res; }
-        else if(aspect === '9:16'){ h = res === 1080 ? 1920 : res === 720 ? 1280 : 854; w = res; }
-        else { w = h = res; }
-        previewCanvas.width = w;
-        previewCanvas.height = h;
-        document.getElementById('previewRes').textContent = `${w}×${h}`;
-        drawPreviewFrame(currentTime || 0);
-    }
+            previewCanvas.addEventListener('pointermove', e => {
+                if (!isDraggingText || selectedTextIdx < 0) return;
+                const rect = previewCanvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) * (previewCanvas.width / rect.width);
+                const y = (e.clientY - rect.top) * (previewCanvas.height / rect.height);
+                textOverlays[selectedTextIdx].x = Math.max(0, Math.min(previewCanvas.width, x - dragOffset.x));
+                textOverlays[selectedTextIdx].y = Math.max(0, Math.min(previewCanvas.height, y - dragOffset.y));
+                drawPreviewFrame(currentTime || 0);
+            });
 
-    document.getElementById('aspectSelect').onchange = updateCanvasSize;
-    document.getElementById('resSelect').onchange = updateCanvasSize;
+            previewCanvas.addEventListener('pointerup', () => {
+                if (isDraggingText) {
+                    isDraggingText = false;
+                    setStatus('Text imewekwa');
+                }
+            });
 
-    // Simple export (WAV works reliably)
-    document.getElementById('exportWavBtn').onclick = () => {
-        if(!audioBuffer) return alert('Hakuna audio');
-        const data = audioBuffer.getChannelData(0);
-        const buf = new ArrayBuffer(44 + data.length * 2);
-        const v = new DataView(buf);
-        const writeStr = (o, s) => { for(let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
-        writeStr(0, 'RIFF'); v.setUint32(4, 36 + data.length*2, true);
-        writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
-        v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-        v.setUint32(24, audioBuffer.sampleRate, true);
-        v.setUint32(28, audioBuffer.sampleRate * 2, true);
-        v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-        writeStr(36, 'data'); v.setUint32(40, data.length*2, true);
-        for(let i=0;i<data.length;i++) v.setInt16(44 + i*2, Math.max(-1, Math.min(1, data[i])) * 0x7FFF, true);
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([buf], {type: 'audio/wav'}));
-        a.download = `voice_${Date.now()}.wav`;
-        a.click();
-    };
+            previewCanvas.addEventListener('pointercancel', () => { isDraggingText = false; });
 
-    // Resize wave
-    function resizeWave(){
-        const rect = container.getBoundingClientRect();
-        waveCanvas.width = rect.width;
-        waveCanvas.height = rect.height;
-        if(audioBuffer) renderWaveform(audioBuffer);
-    }
-    window.addEventListener('resize', resizeWave);
-    setTimeout(resizeWave, 80);
-    updateCanvasSize();
-    updateUndoRedoButtons();
-})();
-</script>
+            previewCanvas.addEventListener('wheel', e => {
+                if (selectedTextIdx < 0) return;
+                e.preventDefault();
+                const t = textOverlays[selectedTextIdx];
+                if (e.shiftKey) {
+                    t.rotation = (t.rotation || 0) + (e.deltaY > 0 ? 0.08 : -0.08);
+                } else {
+                    t.scale = Math.max(0.3, Math.min(4.5, (t.scale || 1) + (e.deltaY > 0 ? -0.1 : 0.1)));
+                }
+                drawPreviewFrame(currentTime || 0);
+                setStatus('Text: scale=' + t.scale.toFixed(2) + ' rot=' + ((t.rotation || 0) * 180 / Math.PI).toFixed(1) +
+                    '°');
+            }, { passive: false });
+
+            // Resize
+            function updateCanvasSize() {
+                const res = parseInt(document.getElementById('resSelect').value);
+                const aspect = document.getElementById('aspectSelect').value;
+                let w, h;
+                if (aspect === '16:9') { w = res === 1080 ? 1920 : res === 720 ? 1280 : 854;
+                    h = res; } else if (aspect === '9:16') { h = res === 1080 ? 1920 : res === 720 ? 1280 : 854;
+                    w = res; } else { w = h = res; }
+                previewCanvas.width = w;
+                previewCanvas.height = h;
+                document.getElementById('previewRes').textContent = `${w}×${h}`;
+                textOverlays.forEach(t => {
+                    if (t.x > w) t.x = w / 2;
+                    if (t.y > h) t.y = h * 0.75;
+                });
+                drawPreviewFrame(currentTime || 0);
+            }
+
+            function resizeWave() {
+                const rect = container.getBoundingClientRect();
+                waveCanvas.width = rect.width || 600;
+                waveCanvas.height = rect.height || 90;
+                if (audioBuffer) renderWaveform(audioBuffer);
+                updateSelectionUI();
+            }
+
+            window.addEventListener('resize', () => {
+                resizeWave();
+                updateCanvasSize();
+            });
+
+            // Media management
+            function addMediaItem(file) {
+                const isVideo = file.type.startsWith('video/');
+                const isImage = file.type.startsWith('image/');
+                if (!isVideo && !isImage) return;
+                const url = URL.createObjectURL(file);
+                const item = { type: isVideo ? 'video' : 'image', name: file.name, url: url, data: null, duration: 3 };
+                if (isImage) {
+                    const img = new Image();
+                    img.onload = () => {
+                        item.data = img;
+                        mediaClips.push(item);
+                        renderMediaList();
+                        setStatus('Picha imeongezwa: ' + file.name);
+                        drawPreviewFrame(currentTime || 0);
+                        updateClipCount();
+                    };
+                    img.src = url;
+                } else {
+                    const video = document.createElement('video');
+                    video.src = url;
+                    video.preload = 'auto';
+                    video.muted = true;
+                    video.onloadedmetadata = () => {
+                        item.data = video;
+                        item.duration = video.duration || 3;
+                        mediaClips.push(item);
+                        renderMediaList();
+                        setStatus('Video imeongezwa: ' + file.name);
+                        drawPreviewFrame(currentTime || 0);
+                        updateClipCount();
+                        video.currentTime = Math.min(0.5, video.duration / 2);
+                    };
+                    video.onerror = () => {
+                        item.data = video;
+                        mediaClips.push(item);
+                        renderMediaList();
+                        updateClipCount();
+                    };
+                    video.load();
+                }
+            }
+
+            function renderMediaList() {
+                const list = document.getElementById('mediaList');
+                list.innerHTML = '';
+                mediaClips.forEach((item, i) => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'thumb-wrap';
+                    const thumb = document.createElement('div');
+                    thumb.className = 'video-thumb';
+                    if (item.type === 'image' && item.data && item.data.complete) {
+                        const img = document.createElement('img');
+                        img.src = item.data.src;
+                        img.style.width = '44px';
+                        img.style.height = '44px';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '6px';
+                        thumb.appendChild(img);
+                    } else {
+                        const icon = document.createElement('i');
+                        icon.className = 'fas fa-film';
+                        thumb.appendChild(icon);
+                        const label = document.createElement('span');
+                        label.className = 'v-label';
+                        label.textContent = (i + 1) + '';
+                        thumb.appendChild(label);
+                    }
+                    const del = document.createElement('div');
+                    del.className = 'thumb-del';
+                    del.innerHTML = '×';
+                    del.onclick = e => {
+                        e.stopPropagation();
+                        mediaClips.splice(i, 1);
+                        renderMediaList();
+                        drawPreviewFrame(currentTime || 0);
+                        updateClipCount();
+                        setStatus('Media imefutwa');
+                    };
+                    wrap.appendChild(thumb);
+                    wrap.appendChild(del);
+                    list.appendChild(wrap);
+                });
+                updateClipCount();
+            }
+
+            function updateClipCount() {
+                document.getElementById('clipCount').textContent = 'Clips: ' + mediaClips.length;
+            }
+
+            // Text management
+            function addTextOverlay(text, opts) {
+                const defaults = {
+                    font: document.getElementById('textFont').value || 'Arial Black',
+                    size: parseInt(document.getElementById('textSize').value) || 62,
+                    color: document.getElementById('textColor').value || '#ffffff',
+                    bg: document.getElementById('textBg').value || '#000000',
+                    stroke: document.getElementById('textStroke').value || '#ffd700',
+                    bgEnable: document.getElementById('textBgEnable').checked,
+                    bold: document.getElementById('textBold').checked,
+                    strokeEnable: document.getElementById('textStrokeEnable').checked,
+                    shadowEnable: document.getElementById('textShadowEnable').checked,
+                    animation: document.getElementById('textAnimation').value || 'pop',
+                    x: previewCanvas.width / 2,
+                    y: previewCanvas.height * 0.75,
+                    scale: 1,
+                    rotation: 0
+                };
+                const t = { text, ...defaults, ...opts };
+                textOverlays.push(t);
+                selectedTextIdx = textOverlays.length - 1;
+                renderTextList();
+                drawPreviewFrame(currentTime || 0);
+                setStatus('✅ Text imeongezwa: "' + text + '"');
+                return t;
+            }
+
+            function renderTextList() {
+                const list = document.getElementById('textList');
+                list.innerHTML = '';
+                textOverlays.forEach((t, i) => {
+                    const tag = document.createElement('span');
+                    tag.style.cssText =
+                        `background:#1a2538;padding:2px 10px;border-radius:12px;font-size:0.6rem;color:#e2e8f0;border:1px solid ${i===selectedTextIdx?'#fbbf24':'#2a364d'};cursor:pointer;display:inline-flex;align-items:center;gap:4px;`;
+                    tag.textContent = t.text.substring(0, 12) + (t.text.length > 12 ? '…' : '');
+                    const del = document.createElement('span');
+                    del.style.cssText = 'color:#ef4444;cursor:pointer;font-weight:700;margin-left:4px;';
+                    del.textContent = '×';
+                    del.onclick = e => {
+                        e.stopPropagation();
+                        textOverlays.splice(i, 1);
+                        if (selectedTextIdx === i) selectedTextIdx = -1;
+                        renderTextList();
+                        drawPreviewFrame(currentTime || 0);
+                        setStatus('Text imefutwa');
+                    };
+                    tag.onclick = () => {
+                        selectedTextIdx = i;
+                        renderTextList();
+                        setStatus('Text selected: ' + t.text);
+                    };
+                    tag.appendChild(del);
+                    list.appendChild(tag);
+                });
+            }
+
+            // ===== EXPORT WITH AUDIO - FIXED =====
+            async function exportVideo(format = 'webm') {
+                if (!audioBuffer && mediaClips.length === 0) {
+                    alert('Hakuna media au audio. Ongeza picha/video na audio.');
+                    return;
+                }
+                const duration = audioBuffer ? audioBuffer.duration : Math.max(3, mediaClips.length * 2);
+                const fps = parseInt(document.getElementById('exportFps').value) || 30;
+                const quality = document.getElementById('exportQuality').value;
+
+                setStatus('⏳ Inaandaa video...', true);
+                document.getElementById('exportVideoBtn').disabled = true;
+                document.getElementById('exportVideoBtn2').disabled = true;
+                document.getElementById('exportMp4Btn').disabled = true;
+
+                updateCanvasSize();
+                const w = previewCanvas.width;
+                const h = previewCanvas.height;
+
+                // 1. Ensure audio context is running
+                const ctx = initAudio();
+                if (ctx.state === 'suspended') {
+                    await ctx.resume();
+                    // Wait a bit for resume to take effect
+                    await new Promise(r => setTimeout(r, 100));
+                }
+
+                // 2. Create canvas stream for video
+                const canvasStream = previewCanvas.captureStream(fps);
+
+                // 3. Setup audio mixing
+                let combinedStream;
+                let audioSource = null;
+                let audioDest = null;
+
+                if (audioBuffer) {
+                    try {
+                        audioDest = ctx.createMediaStreamDestination();
+                        audioSource = ctx.createBufferSource();
+                        audioSource.buffer = audioBuffer;
+                        audioSource.connect(audioDest);
+                        audioSource.start(0);
+                        // Give audio time to start
+                        await new Promise(r => setTimeout(r, 150));
+
+                        // Get tracks
+                        const videoTracks = canvasStream.getVideoTracks();
+                        const audioTracks = audioDest.stream.getAudioTracks();
+                        if (audioTracks.length === 0) {
+                            console.warn('No audio tracks in destination, falling back to video only');
+                            combinedStream = canvasStream;
+                        } else {
+                            combinedStream = new MediaStream([...videoTracks, ...audioTracks]);
+                            console.log('Combined stream has ' + audioTracks.length + ' audio tracks');
+                        }
+                    } catch (e) {
+                        console.warn('Audio mix failed:', e);
+                        combinedStream = canvasStream;
+                    }
+                } else {
+                    combinedStream = canvasStream;
+                }
+
+                // 4. Choose mime type that supports audio
+                let mimeType;
+                let ext = 'webm';
+                // Prefer WebM with audio for reliability
+                if (format === 'mp4') {
+                    // Try to get MP4 with audio
+                    if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1,mp4a.40.2')) {
+                        mimeType = 'video/mp4;codecs=avc1,mp4a.40.2';
+                        ext = 'mp4';
+                    } else if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) {
+                        // This might not have audio, but we can try
+                        mimeType = 'video/mp4;codecs=avc1';
+                        ext = 'mp4';
+                    } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+                        mimeType = 'video/mp4';
+                        ext = 'mp4';
+                    } else {
+                        // Fallback to WebM
+                        mimeType = 'video/webm;codecs=vp8,opus';
+                        ext = 'webm';
+                    }
+                } else {
+                    // WebM with audio
+                    if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+                        mimeType = 'video/webm;codecs=vp8,opus';
+                    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+                        mimeType = 'video/webm;codecs=vp9,opus';
+                    } else {
+                        mimeType = 'video/webm;codecs=vp8';
+                    }
+                    ext = 'webm';
+                }
+
+                console.log('Using mimeType:', mimeType);
+
+                const recorder = new MediaRecorder(combinedStream, {
+                    mimeType: mimeType,
+                    videoBitsPerSecond: quality === 'high' ? 4000000 : quality === 'medium' ? 2000000 : 1000000
+                });
+
+                const chunks = [];
+                recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+
+                const done = new Promise((resolve, reject) => {
+                    recorder.onstop = () => {
+                        const blob = new Blob(chunks, { type: mimeType });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `viral_video_${Date.now()}.${ext}`;
+                        a.click();
+                        setStatus('✅ Video imepakuliwa!');
+                        document.getElementById('exportVideoBtn').disabled = false;
+                        document.getElementById('exportVideoBtn2').disabled = false;
+                        document.getElementById('exportMp4Btn').disabled = false;
+                        resolve();
+                    };
+                    recorder.onerror = reject;
+                });
+
+                recorder.start(100);
+
+                let frame = 0;
+                const totalFrames = Math.ceil(duration * fps) + 2;
+
+                function renderNext() {
+                    if (frame > totalFrames) {
+                        setTimeout(() => {
+                            recorder.stop();
+                            if (audioSource) try { audioSource.stop(); } catch (e) {}
+                        }, 500);
+                        return;
+                    }
+                    const t = Math.min(frame / fps, duration);
+                    drawPreviewFrame(t);
+                    frame++;
+                    if (frame % 30 === 0) {
+                        const pct = Math.min(100, Math.round(frame / totalFrames * 100));
+                        setStatus(`⏳ Inaexport... ${pct}%`, true);
+                    }
+                    requestAnimationFrame(renderNext);
+                }
+                renderNext();
+                await done;
+            }
+
+            // Silence removal
+            function autoCleanSilence() {
+                if (!originalBuffer) return alert('Weka audio kwanza (rekodi au upload)');
+                saveState();
+                const data = originalBuffer.getChannelData(0);
+                const rate = originalBuffer.sampleRate;
+                const thresholdVal = parseFloat(document.getElementById('thresholdSlider').value) || 42;
+                const threshold = Math.pow(10, -thresholdVal / 20);
+                const minSilMs = parseFloat(document.getElementById('minSilenceSlider').value) || 500;
+                const minSil = Math.floor(minSilMs * rate / 1000);
+                const padMs = parseFloat(document.getElementById('paddingSlider').value) || 50;
+                const pad = Math.floor(padMs * rate / 1000);
+                let segments = [];
+                let inSound = false;
+                let start = 0;
+                let silStart = 0;
+                const win = Math.floor(rate * 0.02);
+                for (let i = 0; i < data.length; i += win) {
+                    let sum = 0;
+                    const end = Math.min(i + win, data.length);
+                    for (let j = i; j < end; j++) sum += data[j] * data[j];
+                    const energy = Math.sqrt(sum / (end - i));
+                    if (energy > threshold) {
+                        if (!inSound) { inSound = true;
+                            start = Math.max(0, i - pad); }
+                    } else if (inSound) {
+                        if (i - silStart > minSil) {
+                            segments.push({ s: start, e: Math.min(data.length, silStart + pad) });
+                            inSound = false;
+                        }
+                        silStart = i;
+                    }
+                }
+                if (inSound) segments.push({ s: start, e: data.length });
+                if (segments.length === 0) { alert('Hakuna sehemu yenye sauti iliyopatikana.'); return; }
+                let out = [];
+                segments.forEach(seg => {
+                    for (let i = seg.s; i < seg.e && i < data.length; i++) out.push(data[i]);
+                });
+                const nb = audioCtx.createBuffer(1, out.length, rate);
+                nb.copyToChannel(new Float32Array(out), 0);
+                loadAudio(nb, false);
+                setStatus('🧹 Silence imeondolewa! Vipande: ' + segments.length);
+                clearSelection();
+                saveState();
+            }
+
+            function boostAudio() {
+                if (!audioBuffer) return alert('Hakuna audio');
+                saveState();
+                const boost = parseFloat(document.getElementById('boostSlider').value) / 100 || 1.6;
+                const data = audioBuffer.getChannelData(0);
+                const out = new Float32Array(data.length);
+                for (let i = 0; i < data.length; i++) {
+                    out[i] = Math.max(-0.98, Math.min(0.98, data[i] * boost));
+                }
+                const nb = audioCtx.createBuffer(1, data.length, audioBuffer.sampleRate);
+                nb.copyToChannel(out, 0);
+                loadAudio(nb, false);
+                setStatus('🔊 Boost imetumika (×' + boost.toFixed(2) + ')');
+                clearSelection();
+                saveState();
+            }
+
+            function normalizeAudio() {
+                if (!audioBuffer) return alert('Hakuna audio');
+                saveState();
+                const data = audioBuffer.getChannelData(0);
+                let max = 0;
+                for (let i = 0; i < data.length; i++) {
+                    const a = Math.abs(data[i]);
+                    if (a > max) max = a;
+                }
+                if (max < 0.001) return alert('Audio iko kimya sana.');
+                const gain = 0.95 / max;
+                const out = new Float32Array(data.length);
+                for (let i = 0; i < data.length; i++) out[i] = data[i] * gain;
+                const nb = audioCtx.createBuffer(1, data.length, audioBuffer.sampleRate);
+                nb.copyToChannel(out, 0);
+                loadAudio(nb, false);
+                setStatus('📊 Normalized (peak=' + (max * 100).toFixed(1) + '%)');
+                clearSelection();
+                saveState();
+            }
+
+            // Recording
+            async function startRecording() {
+                if (isRecording) return;
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    recordingStream = stream;
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                    recordedChunks = [];
+                    mediaRecorder.ondataavailable = e => { if (e.data.size) recordedChunks.push(e.data); };
+                    mediaRecorder.onstop = async () => {
+                        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                        const ctx = initAudio();
+                        const buf = await ctx.decodeAudioData(await blob.arrayBuffer());
+                        loadAudio(buf);
+                        saveState();
+                        setStatus('🎤 Rekodi imehifadhiwa');
+                        isRecording = false;
+                        document.getElementById('recordBtn').innerHTML = '<i class="fas fa-circle"></i> Rekodi';
+                        if (recordingStream) recordingStream.getTracks().forEach(t => t.stop());
+                    };
+                    mediaRecorder.start(100);
+                    isRecording = true;
+                    document.getElementById('recordBtn').innerHTML = '<i class="fas fa-circle" style="color:#ef4444;"></i> Rekodi...';
+                    setStatus('🔴 Inarekodi...');
+                } catch (e) {
+                    alert('Haiwezi kufikia maikrofoni. Ruhusu ruhusa ya maikrofoni.');
+                    console.error(e);
+                }
+            }
+
+            function stopRecording() {
+                if (mediaRecorder && isRecording) {
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    document.getElementById('recordBtn').innerHTML = '<i class="fas fa-circle"></i> Rekodi';
+                    setStatus('⏹ Rekodi imesimamishwa');
+                }
+            }
+
+            // MrBeast text
+            function addMrBeastText() {
+                const presets = [
+                    '🔥 SUBSCRIBE!', '⚡ LIKE & SHARE', '💰 WIN $10,000!',
+                    '🎯 CLICK NOW!', '🚀 GO VIRAL!', '💎 EPIC MOMENT',
+                    '🔥 DON\'T MISS!', '⭐ MUST WATCH', '🎬 NEW VIDEO!', '🔥 INSANE!'
+                ];
+                const text = presets[Math.floor(Math.random() * presets.length)];
+                const t = addTextOverlay(text);
+                t.size = 72 + Math.floor(Math.random() * 28);
+                t.color = '#ffffff';
+                t.stroke = ['#ffd700', '#ff6b6b', '#48dbfb', '#ff9ff3', '#feca57'][Math.floor(Math.random() * 5)];
+                t.bold = true;
+                t.strokeEnable = true;
+                t.shadowEnable = true;
+                t.animation = 'pop';
+                t.x = previewCanvas.width / 2 + (Math.random() - 0.5) * 100;
+                t.y = previewCanvas.height * 0.55 + Math.random() * 80;
+                renderTextList();
+                drawPreviewFrame(currentTime || 0);
+                setStatus('🔥 MrBeast text: "' + text + '"');
+            }
+
+            // ===== EVENT BINDINGS =====
+            document.getElementById('recordBtn').onclick = startRecording;
+            document.getElementById('stopRecordBtn').onclick = stopRecording;
+            document.getElementById('uploadAudioBtn').onclick = () => document.getElementById('audioInput').click();
+            document.getElementById('audioInput').onchange = async e => {
+                const f = e.target.files[0];
+                if (!f) return;
+                const ctx = initAudio();
+                const buf = await ctx.decodeAudioData(await f.arrayBuffer());
+                loadAudio(buf);
+                saveState();
+                setStatus('Audio imeupload: ' + f.name);
+            };
+            document.getElementById('uploadMediaBtn').onclick = () => document.getElementById('mediaInput').click();
+            document.getElementById('mediaInput').onchange = e => {
+                Array.from(e.target.files).forEach(f => addMediaItem(f));
+                e.target.value = '';
+            };
+            document.getElementById('addMediaBtn').onclick = () => document.getElementById('mediaInput').click();
+            document.getElementById('clearMediaBtn').onclick = () => {
+                mediaClips = [];
+                renderMediaList();
+                drawPreviewFrame(currentTime || 0);
+                updateClipCount();
+                setStatus('Media zote zimefutwa');
+            };
+            document.getElementById('sortMediaBtn').onclick = () => {
+                for (let i = mediaClips.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [mediaClips[i], mediaClips[j]] = [mediaClips[j], mediaClips[i]];
+                }
+                renderMediaList();
+                setStatus('Media zimepangwa upya');
+            };
+            document.getElementById('autoCleanBtn').onclick = autoCleanSilence;
+            document.getElementById('boostAudioBtn').onclick = boostAudio;
+            document.getElementById('normalizeBtn').onclick = normalizeAudio;
+            document.getElementById('undoBtn').onclick = undo;
+            document.getElementById('redoBtn').onclick = redo;
+            document.getElementById('playBtn').onclick = () => isPlaying ? pausePlayback() : playAudio();
+            document.getElementById('pauseBtn').onclick = pausePlayback;
+            document.getElementById('stopBtn').onclick = stopPlayback;
+            document.getElementById('playPreviewBtn').onclick = () => {
+                if (audioBuffer) {
+                    if (isPlaying) pausePlayback();
+                    else playAudio(currentTime || 0);
+                } else {
+                    let t = 0;
+                    const anim = () => {
+                        if (t > 10) return;
+                        drawPreviewFrame(t);
+                        t += 0.05;
+                        requestAnimationFrame(anim);
+                    };
+                    anim();
+                    setStatus('▶️ Preview animation');
+                }
+            };
+            document.getElementById('pausePreviewBtn').onclick = pausePlayback;
+            document.getElementById('stopPreviewBtn').onclick = stopPlayback;
+            document.getElementById('addTextBtn').onclick = () => {
+                const text = document.getElementById('textInput').value.trim();
+                if (!text) { alert('Andika text kwanza'); return; }
+                addTextOverlay(text);
+                document.getElementById('textInput').value = '';
+            };
+            document.getElementById('clearTextBtn').onclick = () => {
+                textOverlays = [];
+                selectedTextIdx = -1;
+                renderTextList();
+                drawPreviewFrame(currentTime || 0);
+                setStatus('Text zote zimefutwa');
+            };
+            document.getElementById('duplicateTextBtn').onclick = () => {
+                if (selectedTextIdx < 0 || selectedTextIdx >= textOverlays.length) {
+                    alert('Chagua text kwanza kwa kubofya kwenye list');
+                    return;
+                }
+                const orig = textOverlays[selectedTextIdx];
+                const copy = { ...orig, x: orig.x + 20, y: orig.y + 20 };
+                textOverlays.push(copy);
+                selectedTextIdx = textOverlays.length - 1;
+                renderTextList();
+                drawPreviewFrame(currentTime || 0);
+                setStatus('Text imenakiliwa');
+            };
+            document.getElementById('addMrBeastText').onclick = addMrBeastText;
+            document.getElementById('exportVideoBtn').onclick = () => exportVideo('webm');
+            document.getElementById('exportVideoBtn2').onclick = () => exportVideo('webm');
+            document.getElementById('exportMp4Btn').onclick = () => exportVideo('mp4');
+
+            document.getElementById('exportWavBtn').onclick = () => {
+                if (!audioBuffer) return alert('Hakuna audio');
+                const data = audioBuffer.getChannelData(0);
+                const buf = new ArrayBuffer(44 + data.length * 2);
+                const v = new DataView(buf);
+                const ws = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+                ws(0, 'RIFF');
+                v.setUint32(4, 36 + data.length * 2, true);
+                ws(8, 'WAVE');
+                ws(12, 'fmt ');
+                v.setUint32(16, 16, true);
+                v.setUint16(20, 1, true);
+                v.setUint16(22, 1, true);
+                v.setUint32(24, audioBuffer.sampleRate, true);
+                v.setUint32(28, audioBuffer.sampleRate * 2, true);
+                v.setUint16(32, 2, true);
+                v.setUint16(34, 16, true);
+                ws(36, 'data');
+                v.setUint32(40, data.length * 2, true);
+                for (let i = 0; i < data.length; i++) {
+                    v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, data[i])) * 0x7FFF, true);
+                }
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+                a.download = `voice_${Date.now()}.wav`;
+                a.click();
+                setStatus('WAV imepakuliwa');
+            };
+
+            // Selection buttons
+            document.getElementById('deleteSelBtn').onclick = deleteSelection;
+            document.getElementById('splitSelBtn').onclick = splitSelection;
+            document.getElementById('moveToggleBtn').onclick = toggleMoveMode;
+
+            document.getElementById('aspectSelect').onchange = updateCanvasSize;
+            document.getElementById('resSelect').onchange = updateCanvasSize;
+
+            document.querySelectorAll('.controls-row input[type=range]').forEach(slider => {
+                slider.addEventListener('input', () => {
+                    const val = slider.value;
+                    const label = slider.closest('.controls-row').querySelector('label');
+                    if (label) {
+                        const txt = label.textContent.trim().split(' ')[0];
+                        label.textContent = txt + ' ' + val;
+                    }
+                });
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', e => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')
+                    return;
+                if (e.key === ' ' || e.key === 'Space') {
+                    e.preventDefault();
+                    isPlaying ? pausePlayback() : playAudio();
+                }
+                if (e.key === 'r' || e.key === 'R') startRecording();
+                if (e.key === 's' || e.key === 'S') stopRecording();
+                if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault();
+                    undo(); }
+                if (e.key === 'y' && (e.ctrlKey || e.metaKey)) { e.preventDefault();
+                    redo(); }
+                if (e.key === 'm' || e.key === 'M') addMrBeastText();
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    if (selectedTextIdx >= 0 && selectedTextIdx < textOverlays.length) {
+                        textOverlays.splice(selectedTextIdx, 1);
+                        selectedTextIdx = -1;
+                        renderTextList();
+                        drawPreviewFrame(currentTime || 0);
+                        setStatus('Text imefutwa (keyboard)');
+                    }
+                    if (selStart !== null && selEnd !== null) {
+                        deleteSelection();
+                    }
+                }
+                if (e.key === 'Escape') clearSelection();
+            });
+
+            // Init
+            setTimeout(() => {
+                resizeWave();
+                updateCanvasSize();
+                updateUndoRedoButtons();
+                setStatus('🚀 Tayari! Buruta kwenye wimbi kuchagua sehemu, tumia Futa/Gawanya/Hamisha.');
+                setTimeout(() => {
+                    addMrBeastText();
+                }, 400);
+            }, 100);
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            });
+
+            console.log('🔥 AI Studio Pro · Viral Matrix loaded');
+            console.log('📌 Shortcuts: Space=Play/Pause, R=Record, S=Stop, Z=Undo, M=MrBeast Text, Del=Delete selection, Esc=clear selection');
+
+            window.__studio = {
+                mediaClips,
+                textOverlays,
+                audioBuffer,
+                drawPreviewFrame,
+                addMediaItem,
+                addTextOverlay,
+                exportVideo,
+                clearSelection,
+                deleteSelection,
+                toggleMoveMode
+            };
+
+        })();
+    </script>
 </body>
 </html>
