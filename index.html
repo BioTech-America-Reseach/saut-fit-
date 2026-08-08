@@ -3,78 +3,78 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>AI Studio Pro · Fixed</title>
+<title>AI Studio Pro · Fast Export</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f6;padding:10px;min-height:100vh}
-.container{max-width:1360px;margin:0 auto;background:#0d121b;border-radius:20px;padding:16px 18px 22px;border:1px solid #1c2536}
-.header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.header h1{font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:8px}
+body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f6;padding:12px;min-height:100vh}
+.container{max-width:1340px;margin:0 auto;background:#0d121b;border-radius:18px;padding:16px;border:1px solid #1c2536}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.header h1{font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px}
 .header h1 i{color:#60a5fa}
-.badge{background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:3px 10px;border-radius:16px;font-size:0.55rem;font-weight:700;color:#fff}
+.badge{background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:3px 10px;border-radius:14px;font-size:0.55rem;font-weight:700}
 .badge-ai{background:linear-gradient(135deg,#f59e0b,#ef4444)}
-.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#172033;padding:8px 12px;border-radius:30px;margin-bottom:12px;border:1px solid #2a364d}
-.toolbar button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:6px 13px;border-radius:18px;font-weight:600;font-size:0.74rem;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:#172033;padding:8px 12px;border-radius:28px;margin-bottom:12px;border:1px solid #2a364d}
+.toolbar button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:6px 12px;border-radius:16px;font-weight:600;font-size:0.73rem;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
 .toolbar button:hover{background:#3b4b66}
 .toolbar button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
 .toolbar button.success{background:#10b981;border-color:#10b981;color:#fff}
 .toolbar button.warning{background:#f59e0b;border-color:#f59e0b;color:#fff}
 .toolbar button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
-.sep{width:1px;height:22px;background:#3b4b66}
-.status-text{font-size:0.7rem;color:#94a3b8;margin-left:auto;padding:3px 10px;background:#0f172a;border-radius:14px}
-.rec-timer{background:#ef4444;color:#fff;padding:3px 10px;border-radius:12px;font-size:0.74rem;font-weight:700;display:none}
+.sep{width:1px;height:20px;background:#3b4b66}
+.status-text{font-size:0.7rem;color:#94a3b8;margin-left:auto;padding:3px 10px;background:#0f172a;border-radius:12px}
+.rec-timer{background:#ef4444;color:#fff;padding:3px 9px;border-radius:11px;font-size:0.72rem;font-weight:700;display:none}
 .rec-timer.active{display:inline-block}
-.main-grid{display:grid;grid-template-columns:1fr 300px;gap:14px}
-@media(max-width:980px){.main-grid{grid-template-columns:1fr}}
-.preview-panel{background:#0f172a;border-radius:16px;border:1px solid #1e293b;overflow:hidden}
-.preview-header{padding:8px 12px;background:#1e293b;display:flex;justify-content:space-between;align-items:center;font-size:0.73rem;color:#94a3b8}
+.main-grid{display:grid;grid-template-columns:1fr 290px;gap:12px}
+@media(max-width:960px){.main-grid{grid-template-columns:1fr}}
+.preview-panel{background:#0f172a;border-radius:14px;border:1px solid #1e293b;overflow:hidden}
+.preview-header{padding:7px 12px;background:#1e293b;display:flex;justify-content:space-between;font-size:0.72rem;color:#94a3b8}
 #previewCanvas{width:100%;background:#000;display:block;cursor:grab}
-.preview-controls{padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:#0f172a}
-.preview-controls button,.preview-controls select{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 10px;border-radius:12px;font-size:0.72rem;cursor:pointer}
+.preview-controls{padding:7px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:#0f172a}
+.preview-controls button,.preview-controls select{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 9px;border-radius:11px;font-size:0.71rem;cursor:pointer}
 .preview-controls button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
-.side-panel{display:flex;flex-direction:column;gap:10px}
-.panel{background:#172033;border-radius:14px;border:1px solid #2a364d;padding:11px 13px}
-.panel h3{font-size:0.8rem;color:#fbbf24;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.panel label{font-size:0.67rem;color:#94a3b8;display:block;margin-bottom:3px}
-.panel input[type=text],.panel select,.panel textarea,.panel input[type=number]{width:100%;background:#0f172a;border:1px solid #2a364d;color:#e2e8f0;padding:6px 9px;border-radius:8px;font-size:0.75rem;margin-bottom:6px}
-.panel textarea{min-height:46px;resize:vertical}
-.btn-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
-.btn-row button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 10px;border-radius:8px;font-size:0.7rem;cursor:pointer}
+.side-panel{display:flex;flex-direction:column;gap:9px}
+.panel{background:#172033;border-radius:13px;border:1px solid #2a364d;padding:10px 12px}
+.panel h3{font-size:0.78rem;color:#fbbf24;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.panel label{font-size:0.66rem;color:#94a3b8;display:block;margin-bottom:3px}
+.panel input[type=text],.panel select,.panel textarea,.panel input[type=number]{width:100%;background:#0f172a;border:1px solid #2a364d;color:#e2e8f0;padding:6px 8px;border-radius:7px;font-size:0.74rem;margin-bottom:5px}
+.panel textarea{min-height:44px;resize:vertical}
+.btn-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.btn-row button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 9px;border-radius:7px;font-size:0.7rem;cursor:pointer}
 .btn-row button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
 .btn-row button.success{background:#10b981;border-color:#10b981;color:#fff}
 .btn-row button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
-.image-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;max-height:90px;overflow-y:auto}
-.thumb-wrap{position:relative;display:inline-block}
-.image-thumb{width:46px;height:46px;border-radius:7px;object-fit:cover;border:2px solid #3b4b66;cursor:pointer}
-.thumb-del{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;width:16px;height:16px;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
-.wave-area{background:#0f172a;border-radius:14px;padding:10px;border:1px solid #1e293b;margin-top:10px}
-#wave-container{width:100%;height:82px;background:#020617;border-radius:10px;position:relative;overflow:hidden;cursor:crosshair}
+.image-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;max-height:85px;overflow-y:auto}
+.thumb-wrap{position:relative}
+.image-thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;border:2px solid #3b4b66}
+.thumb-del{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;width:15px;height:15px;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.wave-area{background:#0f172a;border-radius:13px;padding:9px;border:1px solid #1e293b;margin-top:9px}
+#wave-container{width:100%;height:78px;background:#020617;border-radius:9px;position:relative;overflow:hidden;cursor:crosshair}
 #waveCanvas{display:block;width:100%;height:100%}
-.playhead{position:absolute;top:0;left:0;width:2px;height:100%;background:#fbbf24;box-shadow:0 0 8px #fbbf24aa;z-index:5;pointer-events:none}
-.selection-region{position:absolute;top:0;height:100%;background:rgba(239,68,68,0.28);border:1px solid #ef4444;z-index:4;display:none;pointer-events:none}
-.transport{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
-.transport button{background:transparent;border:none;color:#cbd5e1;font-size:1rem;padding:3px 7px;cursor:pointer}
-.transport .play-btn{background:#3b82f6;color:#fff;padding:5px 14px;font-size:0.82rem;border-radius:22px;font-weight:700}
-#timeDisplay{font-size:0.74rem;color:#94a3b8}
-.controls{display:flex;flex-wrap:wrap;gap:8px 12px;background:#172033;padding:7px 12px;border-radius:22px;margin-top:6px;border:1px solid #2a364d;align-items:center}
-.controls label{font-size:0.64rem;color:#94a3b8;display:flex;align-items:center;gap:4px}
-.controls input[type=range]{width:52px;height:3px;background:#2a364d;border-radius:6px;-webkit-appearance:none}
-.controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:#fbbf24;border-radius:50%;cursor:pointer}
-.controls .val{min-width:16px;color:#fbbf24;font-weight:600;font-size:0.66rem}
-.metrics-box{background:#172033;border-radius:10px;padding:8px 12px;margin-top:8px;border:1px solid #2a364d;display:none;grid-template-columns:repeat(4,1fr);gap:4px}
+.playhead{position:absolute;top:0;left:0;width:2px;height:100%;background:#fbbf24;box-shadow:0 0 7px #fbbf24aa;z-index:5;pointer-events:none}
+.selection-region{position:absolute;top:0;height:100%;background:rgba(239,68,68,0.25);border:1px solid #ef4444;z-index:4;display:none;pointer-events:none}
+.transport{display:flex;gap:7px;align-items:center;margin-top:5px;flex-wrap:wrap}
+.transport button{background:transparent;border:none;color:#cbd5e1;font-size:0.95rem;padding:3px 6px;cursor:pointer}
+.transport .play-btn{background:#3b82f6;color:#fff;padding:5px 13px;font-size:0.8rem;border-radius:20px;font-weight:700}
+#timeDisplay{font-size:0.72rem;color:#94a3b8}
+.controls{display:flex;flex-wrap:wrap;gap:7px 11px;background:#172033;padding:6px 11px;border-radius:20px;margin-top:5px;border:1px solid #2a364d;align-items:center}
+.controls label{font-size:0.63rem;color:#94a3b8;display:flex;align-items:center;gap:4px}
+.controls input[type=range]{width:50px;height:3px;background:#2a364d;border-radius:5px;-webkit-appearance:none}
+.controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:#fbbf24;border-radius:50%;cursor:pointer}
+.controls .val{min-width:15px;color:#fbbf24;font-weight:600;font-size:0.64rem}
+.metrics-box{background:#172033;border-radius:9px;padding:7px 11px;margin-top:7px;border:1px solid #2a364d;display:none;grid-template-columns:repeat(4,1fr);gap:3px}
 .metrics-box.active{display:grid}
 .metrics-box .item{text-align:center}
-.metrics-box .item .label{font-size:0.54rem;color:#64748b;text-transform:uppercase}
-.metrics-box .item .value{font-size:0.88rem;font-weight:700;color:#fbbf24}
+.metrics-box .item .label{font-size:0.52rem;color:#64748b;text-transform:uppercase}
+.metrics-box .item .value{font-size:0.85rem;font-weight:700;color:#fbbf24}
 .metrics-box .item .value.green{color:#34d399}
 .metrics-box .item .value.red{color:#f87171}
-.info-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;color:#64748b;font-size:0.64rem}
-.info-bar span{background:#0f172a;padding:2px 8px;border-radius:11px;border:1px solid #1e293b}
+.info-bar{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px;color:#64748b;font-size:0.63rem}
+.info-bar span{background:#0f172a;padding:2px 7px;border-radius:10px;border:1px solid #1e293b}
 .countdown-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:9999}
 .countdown-overlay.active{display:flex}
-.countdown-number{font-size:115px;font-weight:800;color:#fff}
-.countdown-number.start{color:#34d399;font-size:56px}
+.countdown-number{font-size:110px;font-weight:800;color:#fff}
+.countdown-number.start{color:#34d399;font-size:52px}
 .file-hidden{display:none}
 </style>
 </head>
@@ -85,7 +85,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
 
 <div class="container">
     <div class="header">
-        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Fixed</span> <span class="badge badge-ai">AI Clean</span></h1>
+        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Fast</span> <span class="badge badge-ai">AI</span></h1>
     </div>
 
     <div class="toolbar">
@@ -101,7 +101,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         <input type="file" id="overlayInput" class="file-hidden" accept="image/*">
         <div class="sep"></div>
         <button id="autoRemoveBtn" class="warning"><i class="fas fa-magic"></i> Ondoa Silence</button>
-        <button id="enhanceBtn" class="success"><i class="fas fa-sliders"></i> Studio Boost</button>
+        <button id="enhanceBtn" class="success"><i class="fas fa-sliders"></i> Boost</button>
         <span class="status-text" id="statusDisplay">Tayari</span>
     </div>
 
@@ -109,7 +109,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         <div>
             <div class="preview-panel">
                 <div class="preview-header">
-                    <span>Preview • Overlay & Text free drag</span>
+                    <span>Preview • Drag Overlay & Text</span>
                     <span id="previewRes">1280×720</span>
                 </div>
                 <canvas id="previewCanvas" width="1280" height="720"></canvas>
@@ -138,16 +138,16 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                 <div class="transport">
                     <button id="playBtn" class="play-btn"><i class="fas fa-play"></i></button>
                     <button id="pauseBtn"><i class="fas fa-pause"></i></button>
-                    <button id="deleteRegionBtn" style="background:#ef4444;color:#fff;border:none;padding:5px 12px;border-radius:14px;font-size:0.73rem;cursor:pointer">
-                        <i class="fas fa-trash"></i> Futa Sehemu
+                    <button id="deleteRegionBtn" style="background:#ef4444;color:#fff;border:none;padding:4px 11px;border-radius:13px;font-size:0.72rem;cursor:pointer">
+                        <i class="fas fa-trash"></i> Futa
                     </button>
                     <span id="timeDisplay">00:00 / 00:00</span>
                 </div>
                 <div class="controls">
-                    <label>Threshold <input type="range" id="thresholdSlider" min="30" max="55" value="45"><span class="val" id="thresholdVal">-45dB</span></label>
-                    <label>Min Silence <input type="range" id="minSilenceSlider" min="300" max="900" value="500"><span class="val" id="minSilenceVal">500ms</span></label>
-                    <label>Padding <input type="range" id="paddingSlider" min="20" max="100" value="50"><span class="val" id="paddingVal">50ms</span></label>
-                    <label>Crossfade <input type="range" id="fadeSlider" min="5" max="25" value="12"><span class="val" id="fadeVal">12ms</span></label>
+                    <label>Thresh <input type="range" id="thresholdSlider" min="30" max="55" value="45"><span class="val" id="thresholdVal">-45dB</span></label>
+                    <label>MinSil <input type="range" id="minSilenceSlider" min="300" max="900" value="500"><span class="val" id="minSilenceVal">500ms</span></label>
+                    <label>Pad <input type="range" id="paddingSlider" min="20" max="100" value="50"><span class="val" id="paddingVal">50ms</span></label>
+                    <label>Fade <input type="range" id="fadeSlider" min="5" max="25" value="12"><span class="val" id="fadeVal">12ms</span></label>
                     <label>Boost <input type="range" id="boostSlider" min="120" max="230" value="165"><span class="val" id="boostVal">165%</span></label>
                 </div>
             </div>
@@ -168,7 +168,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                     <button id="clearImagesBtn" class="danger">Futa</button>
                 </div>
                 <div class="image-list" id="imageList"></div>
-                <label style="margin-top:7px">Effect</label>
+                <label style="margin-top:6px">Effect</label>
                 <select id="imageEffect">
                     <option value="fade">Fade</option>
                     <option value="zoom">Zoom In</option>
@@ -180,24 +180,24 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                     <option value="pulse">Pulse</option>
                     <option value="vibrant">Vibrant</option>
                 </select>
-                <label style="margin-top:7px">Overlay Size</label>
+                <label style="margin-top:6px">Overlay Size</label>
                 <input type="range" id="overlaySize" min="15" max="55" value="28" style="width:100%">
             </div>
 
             <div class="panel">
-                <h3><i class="fas fa-font"></i> Text (Free)</h3>
+                <h3><i class="fas fa-font"></i> Text</h3>
                 <textarea id="textInput" placeholder="Andika text..."></textarea>
-                <div style="display:flex;gap:6px">
+                <div style="display:flex;gap:5px">
                     <select id="textFont" style="flex:1">
                         <option value="Arial Black">Arial Black</option>
                         <option value="Impact">Impact</option>
                         <option value="Georgia">Georgia</option>
                     </select>
-                    <input type="number" id="textSize" value="56" min="18" max="160" style="width:60px">
+                    <input type="number" id="textSize" value="54" min="18" max="160" style="width:55px">
                 </div>
-                <div style="display:flex;gap:6px">
-                    <input type="color" id="textColor" value="#ffffff" style="flex:1;height:30px">
-                    <input type="color" id="textBg" value="#000000" style="flex:1;height:30px">
+                <div style="display:flex;gap:5px">
+                    <input type="color" id="textColor" value="#ffffff" style="flex:1;height:28px">
+                    <input type="color" id="textBg" value="#000000" style="flex:1;height:28px">
                 </div>
                 <label><input type="checkbox" id="textBold" checked> Bold</label>
                 <label><input type="checkbox" id="textBgEnable"> Background</label>
@@ -208,7 +208,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             </div>
 
             <div class="panel">
-                <h3><i class="fas fa-download"></i> Pakua</h3>
+                <h3><i class="fas fa-download"></i> Pakua (Haraka)</h3>
                 <div class="btn-row">
                     <button id="exportVideoBtn" class="success"><i class="fas fa-video"></i> Video</button>
                     <button id="exportWavBtn"><i class="fas fa-file-audio"></i> WAV</button>
@@ -218,8 +218,8 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     </div>
 
     <div class="info-bar">
-        <span>Rekodi → Ondoa Silence → Boost → Ongeza Picha → Pakua Video</span>
-        <span>Overlay & Text: Drag free</span>
+        <span>Rekodi → Ondoa Silence → Boost → Ongeza Picha → Pakua</span>
+        <span>Drag Overlay & Text free</span>
     </div>
 </div>
 
@@ -269,18 +269,16 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         return audioCtx;
     }
 
-    // ================== FIXED SILENCE REMOVAL (vipande vinasogea karibu) ==================
+    // Silence Removal
     function aiRemoveSilence(buffer){
         if(!buffer) return buffer;
         const data = buffer.getChannelData(0);
         const rate = buffer.sampleRate;
-
         const dbVal = parseFloat(document.getElementById('thresholdSlider').value);
         const threshold = Math.pow(10, -dbVal / 20);
         const minSilenceMs = parseFloat(document.getElementById('minSilenceSlider').value);
         const paddingMs = parseFloat(document.getElementById('paddingSlider').value);
         const fadeMs = parseFloat(document.getElementById('fadeSlider').value);
-
         const minSilenceSamples = Math.floor(minSilenceMs/1000 * rate);
         const paddingSamples = Math.floor(paddingMs/1000 * rate);
         const fadeSamples = Math.floor(fadeMs/1000 * rate);
@@ -306,10 +304,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             } else if(isSpeech && inSound && inSilence){
                 if(i - silenceStart >= minSilenceSamples){
                     if(silenceStart - soundStart > Math.floor(rate*0.015)){
-                        found.push({
-                            start: soundStart,
-                            end: Math.min(data.length, silenceStart + paddingSamples)
-                        });
+                        found.push({start: soundStart, end: Math.min(data.length, silenceStart + paddingSamples)});
                     }
                     soundStart = Math.max(0, i - paddingSamples);
                 }
@@ -324,7 +319,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         }
         if(found.length === 0) found.push({start:0, end:data.length});
 
-        // Merge
         found.sort((a,b)=>a.start-b.start);
         let merged = [found[0]];
         for(let i=1;i<found.length;i++){
@@ -333,23 +327,17 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             } else merged.push(found[i]);
         }
 
-        // ===== MUHIMU: Unganisha vipande KARIBU (hakuna gap kubwa) =====
         let newData = [];
         merged.forEach((seg, idx)=>{
             let segData = Array.from(data.slice(seg.start, seg.end));
-
-            // Fade in
             const fi = Math.min(fadeSamples, segData.length);
             for(let i=0;i<fi;i++) segData[i] *= (i/fi);
-
-            // Fade out
             const fo = Math.min(fadeSamples, segData.length);
             for(let i=0;i<fo;i++) segData[segData.length-1-i] *= (i/fo);
 
             if(idx === 0){
                 newData.push(...segData);
             } else {
-                // Crossfade fupi ili viungane laini
                 const cf = Math.min(fadeSamples, segData.length, newData.length);
                 for(let i=0;i<cf;i++){
                     const t = i/cf;
@@ -360,7 +348,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         });
 
         if(newData.length < 100) return buffer;
-
         const nb = audioCtx.createBuffer(1, newData.length, rate);
         nb.copyToChannel(new Float32Array(newData), 0);
 
@@ -447,7 +434,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         wctx.fillRect(0,0,waveCanvas.width,waveCanvas.height);
         wctx.beginPath();
         wctx.strokeStyle='#60a5fa';
-        wctx.lineWidth=1.5;
+        wctx.lineWidth=1.4;
         for(let i=0;i<waveCanvas.width;i++){
             let min=1,max=-1;
             for(let j=0;j<step;j++){
@@ -601,7 +588,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         textOverlays.push({
             text,
             font:document.getElementById('textFont').value,
-            size:parseInt(document.getElementById('textSize').value)||56,
+            size:parseInt(document.getElementById('textSize').value)||54,
             color:document.getElementById('textColor').value,
             bg:document.getElementById('textBg').value,
             bgEnable:document.getElementById('textBgEnable').checked,
@@ -628,14 +615,12 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         drawPreviewFrame(currentTime||0);
     }
 
-    // ================== DRAW (Fixed for export) ==================
     function drawPreviewFrame(time){
         const w = previewCanvas.width;
         const h = previewCanvas.height;
         pctx.fillStyle = '#000';
         pctx.fillRect(0, 0, w, h);
 
-        // Background images (slides)
         if(images.length > 0){
             const duration = audioBuffer ? audioBuffer.duration : 8;
             const idx = Math.min(images.length-1, Math.floor((time / duration) * images.length));
@@ -683,7 +668,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             }
         }
 
-        // Overlay
         if(overlay.img && overlay.img.complete){
             const sizePct = parseFloat(document.getElementById('overlaySize').value)/100;
             const ow = w * sizePct;
@@ -693,7 +677,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             pctx.drawImage(overlay.img, ox, oy, ow, oh);
         }
 
-        // Text
         textOverlays.forEach(t=>{
             pctx.save();
             pctx.translate(t.x, t.y);
@@ -741,34 +724,42 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         stopPlayback();
     }
 
-    // ================== FIXED EXPORT VIDEO ==================
+    // ================== FAST VIDEO EXPORT ==================
     async function exportVideo(){
         if(!audioBuffer && !images.length) return alert('Hakuna content');
         updateCanvasSize();
         const duration = audioBuffer ? audioBuffer.duration : 6;
-        document.getElementById('statusDisplay').textContent = 'Inarekodi video... subiri';
+        const fps = 24;
+        const totalFrames = Math.ceil(duration * fps);
 
-        // Ensure we draw at least one frame first
+        document.getElementById('statusDisplay').textContent = 'Inaandaa video... 0%';
+        document.getElementById('exportVideoBtn').disabled = true;
+        document.getElementById('exportVideoBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
         drawPreviewFrame(0);
 
-        const canvasStream = previewCanvas.captureStream(30);
+        const canvasStream = previewCanvas.captureStream(fps);
         let combined = canvasStream;
+        let audioSource = null;
 
         if(audioBuffer){
             const dest = audioCtx.createMediaStreamDestination();
-            const src = audioCtx.createBufferSource();
-            src.buffer = audioBuffer;
-            src.connect(dest);
-            src.start(0);
+            audioSource = audioCtx.createBufferSource();
+            audioSource.buffer = audioBuffer;
+            audioSource.connect(dest);
             combined = new MediaStream([
                 ...canvasStream.getVideoTracks(),
                 ...dest.stream.getAudioTracks()
             ]);
         }
 
-        const recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9' });
+        const recorder = new MediaRecorder(combined, {
+            mimeType: 'video/webm;codecs=vp9',
+            videoBitsPerSecond: 3500000
+        });
+
         const chunks = [];
-        recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+        recorder.ondataavailable = e => { if(e.data && e.data.size > 0) chunks.push(e.data); };
         recorder.onstop = () => {
             const blob = new Blob(chunks, { type: 'video/webm' });
             const a = document.createElement('a');
@@ -776,53 +767,55 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             a.download = `ai_studio_${Date.now()}.webm`;
             a.click();
             document.getElementById('statusDisplay').textContent = 'Video imepakuliwa!';
+            document.getElementById('exportVideoBtn').disabled = false;
+            document.getElementById('exportVideoBtn').innerHTML = '<i class="fas fa-video"></i> Video';
             stopPreview();
+            if(audioSource) try{audioSource.stop()}catch(e){}
         };
 
-        recorder.start(100); // timeslice helps
+        recorder.start(40);
 
-        // Manually drive the frames during recording
-        isPreviewPlaying = true;
-        const start = performance.now();
-        function recordLoop(now){
-            if(!isPreviewPlaying) return;
-            const t = (now - start) / 1000;
-            if(t > duration + 0.1){
-                isPreviewPlaying = false;
-                setTimeout(() => {
+        let frame = 0;
+        function renderNextFrame(){
+            if(frame > totalFrames){
+                setTimeout(()=>{
                     recorder.stop();
-                    combined.getTracks().forEach(t => t.stop());
-                }, 200);
+                    combined.getTracks().forEach(t=>t.stop());
+                },120);
                 return;
             }
+            const t = frame / fps;
             drawPreviewFrame(t);
-            previewAnimId = requestAnimationFrame(recordLoop);
+            const percent = Math.min(100, Math.round((frame / totalFrames)*100));
+            document.getElementById('statusDisplay').textContent = `Inapakua... ${percent}%`;
+            frame++;
+            if(frame % 4 === 0) setTimeout(renderNextFrame, 0);
+            else requestAnimationFrame(renderNextFrame);
         }
-        previewAnimId = requestAnimationFrame(recordLoop);
 
-        // Also play audio
-        if(audioBuffer){
-            stopPlayback();
-            pauseOffset = 0;
-            playAudio();
-        }
+        if(audioBuffer && audioSource) audioSource.start(0);
+        renderNextFrame();
     }
 
     function exportWav(){
         if(!audioBuffer) return alert('Hakuna audio');
-        const data = audioBuffer.getChannelData(0);
-        const buf = new ArrayBuffer(44 + data.length*2);
-        const v = new DataView(buf);
-        const ws = (o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
-        ws(0,'RIFF');v.setUint32(4,36+data.length*2,true);ws(8,'WAVE');
-        ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
-        v.setUint32(24,audioBuffer.sampleRate,true);v.setUint32(28,audioBuffer.sampleRate*2,true);
-        v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,data.length*2,true);
-        for(let i=0;i<data.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,data[i]))*0x7FFF,true);
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
-        a.download=`voice_${Date.now()}.wav`;
-        a.click();
+        document.getElementById('statusDisplay').textContent = 'Inaandaa WAV...';
+        setTimeout(()=>{
+            const data = audioBuffer.getChannelData(0);
+            const buf = new ArrayBuffer(44 + data.length*2);
+            const v = new DataView(buf);
+            const ws = (o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+            ws(0,'RIFF');v.setUint32(4,36+data.length*2,true);ws(8,'WAVE');
+            ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+            v.setUint32(24,audioBuffer.sampleRate,true);v.setUint32(28,audioBuffer.sampleRate*2,true);
+            v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,data.length*2,true);
+            for(let i=0;i<data.length;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,data[i]))*0x7FFF,true);
+            const a=document.createElement('a');
+            a.href=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+            a.download=`voice_${Date.now()}.wav`;
+            a.click();
+            document.getElementById('statusDisplay').textContent = 'WAV imepakuliwa!';
+        },10);
     }
 
     // Events
@@ -865,14 +858,14 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             const result = aiRemoveSilence(originalBuffer);
             loadAudio(result, false);
             document.getElementById('autoRemoveBtn').innerHTML='<i class="fas fa-magic"></i> Ondoa Silence';
-            document.getElementById('statusDisplay').textContent='Silence imeondolewa • vipande vimesogezwa karibu';
+            document.getElementById('statusDisplay').textContent='Silence imeondolewa';
         },30);
     };
 
     document.getElementById('enhanceBtn').onclick=()=>{
         if(!audioBuffer) return alert('Hakuna audio');
         loadAudio(applyStudioBoost(audioBuffer),false);
-        document.getElementById('statusDisplay').textContent='Studio Boost imetumika';
+        document.getElementById('statusDisplay').textContent='Boost imetumika';
     };
 
     document.getElementById('addTextBtn').onclick=addText;
@@ -920,7 +913,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         const rect=previewCanvas.getBoundingClientRect();
         const x=(e.clientX-rect.left)*(previewCanvas.width/rect.width);
         const y=(e.clientY-rect.top)*(previewCanvas.height/rect.height);
-
         if(overlay.img){
             const sizePct=parseFloat(document.getElementById('overlaySize').value)/100;
             const ow=previewCanvas.width*sizePct;
