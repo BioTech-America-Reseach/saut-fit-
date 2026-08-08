@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>AI Studio Pro · Final</title>
+<title>AI Studio Pro · Fixed</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -85,7 +85,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
 
 <div class="container">
     <div class="header">
-        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Final</span> <span class="badge badge-ai">AI Clean</span></h1>
+        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Fixed</span> <span class="badge badge-ai">AI Clean</span></h1>
     </div>
 
     <div class="toolbar">
@@ -109,7 +109,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         <div>
             <div class="preview-panel">
                 <div class="preview-header">
-                    <span>Preview • Overlay & Text unaweza kuihamisha free</span>
+                    <span>Preview • Overlay & Text free drag</span>
                     <span id="previewRes">1280×720</span>
                 </div>
                 <canvas id="previewCanvas" width="1280" height="720"></canvas>
@@ -147,7 +147,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                     <label>Threshold <input type="range" id="thresholdSlider" min="30" max="55" value="45"><span class="val" id="thresholdVal">-45dB</span></label>
                     <label>Min Silence <input type="range" id="minSilenceSlider" min="300" max="900" value="500"><span class="val" id="minSilenceVal">500ms</span></label>
                     <label>Padding <input type="range" id="paddingSlider" min="20" max="100" value="50"><span class="val" id="paddingVal">50ms</span></label>
-                    <label>Crossfade <input type="range" id="fadeSlider" min="8" max="30" value="15"><span class="val" id="fadeVal">15ms</span></label>
+                    <label>Crossfade <input type="range" id="fadeSlider" min="5" max="25" value="12"><span class="val" id="fadeVal">12ms</span></label>
                     <label>Boost <input type="range" id="boostSlider" min="120" max="230" value="165"><span class="val" id="boostVal">165%</span></label>
                 </div>
             </div>
@@ -172,11 +172,16 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                 <select id="imageEffect">
                     <option value="fade">Fade</option>
                     <option value="zoom">Zoom In</option>
+                    <option value="zoomout">Zoom Out</option>
                     <option value="kenburns">Ken Burns</option>
+                    <option value="slide">Slide Left</option>
+                    <option value="slideright">Slide Right</option>
+                    <option value="rotate">Rotate</option>
+                    <option value="pulse">Pulse</option>
                     <option value="vibrant">Vibrant</option>
                 </select>
                 <label style="margin-top:7px">Overlay Size</label>
-                <input type="range" id="overlaySize" min="15" max="60" value="30" style="width:100%">
+                <input type="range" id="overlaySize" min="15" max="55" value="28" style="width:100%">
             </div>
 
             <div class="panel">
@@ -207,15 +212,14 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                 <div class="btn-row">
                     <button id="exportVideoBtn" class="success"><i class="fas fa-video"></i> Video</button>
                     <button id="exportWavBtn"><i class="fas fa-file-audio"></i> WAV</button>
-                    <button id="exportMp3Btn"><i class="fas fa-music"></i> MP3</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="info-bar">
-        <span>Rekodi → Ondoa Silence → Boost → Ongeza Picha/Text/Overlay → Pakua</span>
-        <span>Overlay & Text: Drag free | Scroll = kuza | Shift+Scroll = zungusha</span>
+        <span>Rekodi → Ondoa Silence → Boost → Ongeza Picha → Pakua Video</span>
+        <span>Overlay & Text: Drag free</span>
     </div>
 </div>
 
@@ -240,7 +244,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     let animId = null;
 
     let images = [];
-    let overlay = {img: null, x: 0.75, y: 0.08, scale: 0.3}; // free position (0-1)
+    let overlay = {img: null, x: 0.78, y: 0.12};
     let textOverlays = [];
     let selectedTextIdx = -1;
     let isDraggingText = false;
@@ -265,7 +269,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         return audioCtx;
     }
 
-    // ================== SILENCE REMOVAL (High Quality) ==================
+    // ================== FIXED SILENCE REMOVAL (vipande vinasogea karibu) ==================
     function aiRemoveSilence(buffer){
         if(!buffer) return buffer;
         const data = buffer.getChannelData(0);
@@ -287,7 +291,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
 
         for(let i=0; i<data.length; i+=Math.floor(win/2)){
             const end = Math.min(i+win, data.length);
-            let sum=0;
+            let sum = 0;
             for(let j=i;j<end;j++) sum += data[j]*data[j];
             const energy = Math.sqrt(sum/(end-i));
             const isSpeech = energy > threshold;
@@ -301,8 +305,11 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                 silenceStart = i;
             } else if(isSpeech && inSound && inSilence){
                 if(i - silenceStart >= minSilenceSamples){
-                    if(silenceStart - soundStart > Math.floor(rate*0.02)){
-                        found.push({start: soundStart, end: Math.min(data.length, silenceStart + paddingSamples)});
+                    if(silenceStart - soundStart > Math.floor(rate*0.015)){
+                        found.push({
+                            start: soundStart,
+                            end: Math.min(data.length, silenceStart + paddingSamples)
+                        });
                     }
                     soundStart = Math.max(0, i - paddingSamples);
                 }
@@ -311,41 +318,49 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         }
         if(inSound){
             const endPos = inSilence ? silenceStart : data.length;
-            if(endPos - soundStart > Math.floor(rate*0.02)){
+            if(endPos - soundStart > Math.floor(rate*0.015)){
                 found.push({start: soundStart, end: Math.min(data.length, endPos)});
             }
         }
         if(found.length === 0) found.push({start:0, end:data.length});
 
+        // Merge
         found.sort((a,b)=>a.start-b.start);
         let merged = [found[0]];
         for(let i=1;i<found.length;i++){
-            if(found[i].start <= merged[merged.length-1].end + Math.floor(rate*0.04)){
+            if(found[i].start <= merged[merged.length-1].end + Math.floor(rate*0.03)){
                 merged[merged.length-1].end = Math.max(merged[merged.length-1].end, found[i].end);
             } else merged.push(found[i]);
         }
 
+        // ===== MUHIMU: Unganisha vipande KARIBU (hakuna gap kubwa) =====
         let newData = [];
         merged.forEach((seg, idx)=>{
-            let segData = data.slice(seg.start, seg.end);
+            let segData = Array.from(data.slice(seg.start, seg.end));
+
+            // Fade in
             const fi = Math.min(fadeSamples, segData.length);
             for(let i=0;i<fi;i++) segData[i] *= (i/fi);
+
+            // Fade out
             const fo = Math.min(fadeSamples, segData.length);
             for(let i=0;i<fo;i++) segData[segData.length-1-i] *= (i/fo);
 
-            if(idx===0){
-                for(let i=0;i<segData.length;i++) newData.push(segData[i]);
+            if(idx === 0){
+                newData.push(...segData);
             } else {
+                // Crossfade fupi ili viungane laini
                 const cf = Math.min(fadeSamples, segData.length, newData.length);
                 for(let i=0;i<cf;i++){
                     const t = i/cf;
-                    newData[newData.length-cf+i] = newData[newData.length-cf+i]*(1-t) + segData[i]*t;
+                    newData[newData.length - cf + i] = newData[newData.length - cf + i]*(1-t) + segData[i]*t;
                 }
-                for(let i=cf;i<segData.length;i++) newData.push(segData[i]);
+                newData.push(...segData.slice(cf));
             }
         });
 
         if(newData.length < 100) return buffer;
+
         const nb = audioCtx.createBuffer(1, newData.length, rate);
         nb.copyToChannel(new Float32Array(newData), 0);
 
@@ -388,7 +403,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         if(!audioBuffer || selectedEndSample<=selectedStartSample) return alert('Chagua sehemu kwanza');
         const data=audioBuffer.getChannelData(0);
         const rate=audioBuffer.sampleRate;
-        const fade=Math.floor(0.015*rate);
+        const fade=Math.floor(0.012*rate);
         let newData=[];
         for(let i=0;i<selectedStartSample;i++) newData.push(data[i]);
         const afterStart=selectedEndSample;
@@ -554,7 +569,11 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     function addImages(files){
         Array.from(files).forEach(file=>{
             const img=new Image();
-            img.onload=()=>{images.push({img,name:file.name});renderImageList();drawPreviewFrame(0)};
+            img.onload=()=>{
+                images.push({img, name:file.name});
+                renderImageList();
+                drawPreviewFrame(0);
+            };
             img.src=URL.createObjectURL(file);
         });
     }
@@ -609,131 +628,192 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         drawPreviewFrame(currentTime||0);
     }
 
+    // ================== DRAW (Fixed for export) ==================
     function drawPreviewFrame(time){
-        const w=previewCanvas.width, h=previewCanvas.height;
-        pctx.fillStyle='#000';
-        pctx.fillRect(0,0,w,h);
+        const w = previewCanvas.width;
+        const h = previewCanvas.height;
+        pctx.fillStyle = '#000';
+        pctx.fillRect(0, 0, w, h);
 
-        // Background images
-        if(images.length){
-            const idx=Math.min(images.length-1, Math.floor((time/(audioBuffer?audioBuffer.duration:8))*images.length));
-            const imgObj=images[idx].img;
-            const effect=document.getElementById('imageEffect').value;
-            const scale=Math.max(w/imgObj.width,h/imgObj.height);
-            let iw=imgObj.width*scale, ih=imgObj.height*scale;
-            let ix=(w-iw)/2, iy=(h-ih)/2;
-            const localTime=(time%4)/4;
+        // Background images (slides)
+        if(images.length > 0){
+            const duration = audioBuffer ? audioBuffer.duration : 8;
+            const idx = Math.min(images.length-1, Math.floor((time / duration) * images.length));
+            const imgObj = images[idx].img;
+            if(imgObj && imgObj.complete){
+                const effect = document.getElementById('imageEffect').value;
+                const scale = Math.max(w/imgObj.width, h/imgObj.height);
+                let iw = imgObj.width * scale;
+                let ih = imgObj.height * scale;
+                let ix = (w - iw)/2;
+                let iy = (h - ih)/2;
+                const localTime = (time % 3.5) / 3.5;
 
-            pctx.save();
-            if(effect==='zoom'){
-                const z=1+localTime*0.13;
-                pctx.translate(w/2,h/2);pctx.scale(z,z);pctx.translate(-w/2,-h/2);
-            }else if(effect==='kenburns'){
-                const z=1+localTime*0.1;
-                pctx.translate(w/2+(localTime-0.5)*30,h/2);pctx.scale(z,z);pctx.translate(-w/2,-h/2);
-            }else if(effect==='vibrant'){
-                pctx.filter='contrast(1.12) saturate(1.25) brightness(1.04)';
+                pctx.save();
+                if(effect === 'zoom'){
+                    const z = 1 + localTime * 0.14;
+                    pctx.translate(w/2, h/2); pctx.scale(z,z); pctx.translate(-w/2,-h/2);
+                } else if(effect === 'zoomout'){
+                    const z = 1.14 - localTime * 0.14;
+                    pctx.translate(w/2, h/2); pctx.scale(z,z); pctx.translate(-w/2,-h/2);
+                } else if(effect === 'kenburns'){
+                    const z = 1 + localTime * 0.11;
+                    pctx.translate(w/2 + (localTime-0.5)*40, h/2);
+                    pctx.scale(z,z); pctx.translate(-w/2,-h/2);
+                } else if(effect === 'slide'){
+                    ix -= localTime * 80;
+                } else if(effect === 'slideright'){
+                    ix += localTime * 80;
+                } else if(effect === 'rotate'){
+                    pctx.translate(w/2,h/2);
+                    pctx.rotate(localTime * 0.12);
+                    pctx.translate(-w/2,-h/2);
+                } else if(effect === 'pulse'){
+                    const z = 1 + Math.sin(localTime * Math.PI * 2) * 0.04;
+                    pctx.translate(w/2,h/2); pctx.scale(z,z); pctx.translate(-w/2,-h/2);
+                } else if(effect === 'vibrant'){
+                    pctx.filter = 'contrast(1.13) saturate(1.3) brightness(1.05)';
+                }
+                if(effect === 'fade') pctx.globalAlpha = 0.3 + localTime * 0.7;
+
+                pctx.drawImage(imgObj, ix, iy, iw, ih);
+                pctx.restore();
+                pctx.filter = 'none';
+                pctx.globalAlpha = 1;
             }
-            if(effect==='fade') pctx.globalAlpha=0.35+localTime*0.65;
-            pctx.drawImage(imgObj,ix,iy,iw,ih);
-            pctx.restore();
-            pctx.filter='none';pctx.globalAlpha=1;
         }
 
-        // Free Overlay
-        if(overlay.img){
-            const sizePct=parseFloat(document.getElementById('overlaySize').value)/100;
-            const ow=w*sizePct;
-            const oh=overlay.img.height*(ow/overlay.img.width);
-            const ox=overlay.x*w - ow/2;
-            const oy=overlay.y*h - oh/2;
+        // Overlay
+        if(overlay.img && overlay.img.complete){
+            const sizePct = parseFloat(document.getElementById('overlaySize').value)/100;
+            const ow = w * sizePct;
+            const oh = overlay.img.height * (ow / overlay.img.width);
+            const ox = overlay.x * w - ow/2;
+            const oy = overlay.y * h - oh/2;
             pctx.drawImage(overlay.img, ox, oy, ow, oh);
         }
 
-        // Free Text
+        // Text
         textOverlays.forEach(t=>{
             pctx.save();
-            pctx.translate(t.x,t.y);
-            pctx.rotate(t.rotation||0);
-            pctx.scale(t.scale,t.scale);
-            const weight=t.bold?'bold':'normal';
-            pctx.font=`${weight} ${t.size}px ${t.font}`;
-            pctx.textAlign='center';
-            pctx.textBaseline='middle';
+            pctx.translate(t.x, t.y);
+            pctx.rotate(t.rotation || 0);
+            pctx.scale(t.scale, t.scale);
+            const weight = t.bold ? 'bold' : 'normal';
+            pctx.font = `${weight} ${t.size}px ${t.font}`;
+            pctx.textAlign = 'center';
+            pctx.textBaseline = 'middle';
             if(t.bgEnable){
-                const m=pctx.measureText(t.text);
-                pctx.fillStyle=t.bg;
-                pctx.globalAlpha=0.7;
-                pctx.fillRect(-m.width/2-11,-t.size/2-7,m.width+22,t.size+14);
-                pctx.globalAlpha=1;
+                const m = pctx.measureText(t.text);
+                pctx.fillStyle = t.bg;
+                pctx.globalAlpha = 0.72;
+                pctx.fillRect(-m.width/2-12, -t.size/2-8, m.width+24, t.size+16);
+                pctx.globalAlpha = 1;
             }
-            pctx.shadowColor='rgba(0,0,0,0.6)';
-            pctx.shadowBlur=5;
-            pctx.shadowOffsetX=1;pctx.shadowOffsetY=2;
-            pctx.fillStyle=t.color;
-            pctx.fillText(t.text,0,0);
+            pctx.shadowColor = 'rgba(0,0,0,0.65)';
+            pctx.shadowBlur = 6;
+            pctx.shadowOffsetX = 1;
+            pctx.shadowOffsetY = 2;
+            pctx.fillStyle = t.color;
+            pctx.fillText(t.text, 0, 0);
             pctx.restore();
         });
     }
 
     function startPreview(){
-        if(!audioBuffer&&!images.length) return alert('Ongeza content');
-        isPreviewPlaying=true;
-        const start=performance.now();
-        const duration=audioBuffer?audioBuffer.duration:8;
-        if(audioBuffer){stopPlayback();pauseOffset=0;playAudio()}
+        if(!audioBuffer && !images.length) return alert('Ongeza content');
+        isPreviewPlaying = true;
+        const start = performance.now();
+        const duration = audioBuffer ? audioBuffer.duration : 8;
+        if(audioBuffer){ stopPlayback(); pauseOffset=0; playAudio(); }
         function loop(now){
             if(!isPreviewPlaying) return;
-            const t=(now-start)/1000;
-            if(t>duration){isPreviewPlaying=false;stopPlayback();return}
+            const t = (now - start)/1000;
+            if(t > duration){ isPreviewPlaying=false; stopPlayback(); return; }
             drawPreviewFrame(t);
-            previewAnimId=requestAnimationFrame(loop);
+            previewAnimId = requestAnimationFrame(loop);
         }
-        previewAnimId=requestAnimationFrame(loop);
+        previewAnimId = requestAnimationFrame(loop);
     }
     function stopPreview(){
-        isPreviewPlaying=false;
+        isPreviewPlaying = false;
         cancelAnimationFrame(previewAnimId);
         stopPlayback();
     }
 
+    // ================== FIXED EXPORT VIDEO ==================
     async function exportVideo(){
-        if(!audioBuffer&&!images.length) return alert('Hakuna content');
+        if(!audioBuffer && !images.length) return alert('Hakuna content');
         updateCanvasSize();
-        const duration=audioBuffer?audioBuffer.duration:6;
-        document.getElementById('statusDisplay').textContent='Inarekodi video...';
-        const canvasStream=previewCanvas.captureStream(30);
-        let combined=canvasStream;
+        const duration = audioBuffer ? audioBuffer.duration : 6;
+        document.getElementById('statusDisplay').textContent = 'Inarekodi video... subiri';
+
+        // Ensure we draw at least one frame first
+        drawPreviewFrame(0);
+
+        const canvasStream = previewCanvas.captureStream(30);
+        let combined = canvasStream;
+
         if(audioBuffer){
-            const dest=audioCtx.createMediaStreamDestination();
-            const src=audioCtx.createBufferSource();
-            src.buffer=audioBuffer;
+            const dest = audioCtx.createMediaStreamDestination();
+            const src = audioCtx.createBufferSource();
+            src.buffer = audioBuffer;
             src.connect(dest);
             src.start(0);
-            combined=new MediaStream([...canvasStream.getVideoTracks(),...dest.stream.getAudioTracks()]);
+            combined = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...dest.stream.getAudioTracks()
+            ]);
         }
-        const recorder=new MediaRecorder(combined,{mimeType:'video/webm;codecs=vp9'});
-        const chunks=[];
-        recorder.ondataavailable=e=>chunks.push(e.data);
-        recorder.onstop=()=>{
-            const a=document.createElement('a');
-            a.href=URL.createObjectURL(new Blob(chunks,{type:'video/webm'}));
-            a.download=`ai_studio_${Date.now()}.webm`;
+
+        const recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9' });
+        const chunks = [];
+        recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `ai_studio_${Date.now()}.webm`;
             a.click();
-            document.getElementById('statusDisplay').textContent='Video imepakuliwa';
+            document.getElementById('statusDisplay').textContent = 'Video imepakuliwa!';
             stopPreview();
         };
-        recorder.start();
-        startPreview();
-        setTimeout(()=>{recorder.stop();combined.getTracks().forEach(t=>t.stop())},(duration+0.4)*1000);
+
+        recorder.start(100); // timeslice helps
+
+        // Manually drive the frames during recording
+        isPreviewPlaying = true;
+        const start = performance.now();
+        function recordLoop(now){
+            if(!isPreviewPlaying) return;
+            const t = (now - start) / 1000;
+            if(t > duration + 0.1){
+                isPreviewPlaying = false;
+                setTimeout(() => {
+                    recorder.stop();
+                    combined.getTracks().forEach(t => t.stop());
+                }, 200);
+                return;
+            }
+            drawPreviewFrame(t);
+            previewAnimId = requestAnimationFrame(recordLoop);
+        }
+        previewAnimId = requestAnimationFrame(recordLoop);
+
+        // Also play audio
+        if(audioBuffer){
+            stopPlayback();
+            pauseOffset = 0;
+            playAudio();
+        }
     }
 
     function exportWav(){
         if(!audioBuffer) return alert('Hakuna audio');
-        const data=audioBuffer.getChannelData(0);
-        const buf=new ArrayBuffer(44+data.length*2);
-        const v=new DataView(buf);
-        const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+        const data = audioBuffer.getChannelData(0);
+        const buf = new ArrayBuffer(44 + data.length*2);
+        const v = new DataView(buf);
+        const ws = (o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
         ws(0,'RIFF');v.setUint32(4,36+data.length*2,true);ws(8,'WAVE');
         ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
         v.setUint32(24,audioBuffer.sampleRate,true);v.setUint32(28,audioBuffer.sampleRate*2,true);
@@ -743,12 +823,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         a.href=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
         a.download=`voice_${Date.now()}.wav`;
         a.click();
-    }
-
-    function exportMp3(){
-        // Browser limited - we export WAV and rename for simplicity
-        exportWav();
-        alert('Browser haitoi MP3 moja kwa moja. WAV imepakuliwa (unaweza kubadilisha jina kuwa .mp3 au ubadilishe kwa converter).');
     }
 
     // Events
@@ -788,10 +862,10 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         if(!originalBuffer) return alert('Rekodi au weka audio kwanza');
         document.getElementById('autoRemoveBtn').innerHTML='<i class="fas fa-spinner fa-spin"></i>';
         setTimeout(()=>{
-            const result=aiRemoveSilence(originalBuffer);
-            loadAudio(result,false);
+            const result = aiRemoveSilence(originalBuffer);
+            loadAudio(result, false);
             document.getElementById('autoRemoveBtn').innerHTML='<i class="fas fa-magic"></i> Ondoa Silence';
-            document.getElementById('statusDisplay').textContent='Silence imeondolewa + crossfade';
+            document.getElementById('statusDisplay').textContent='Silence imeondolewa • vipande vimesogezwa karibu';
         },30);
     };
 
@@ -808,7 +882,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     document.getElementById('stopPreviewBtn').onclick=stopPreview;
     document.getElementById('exportVideoBtn').onclick=exportVideo;
     document.getElementById('exportWavBtn').onclick=exportWav;
-    document.getElementById('exportMp3Btn').onclick=exportMp3;
     document.getElementById('aspectSelect').onchange=updateCanvasSize;
     document.getElementById('resSelect').onchange=updateCanvasSize;
 
@@ -842,13 +915,12 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         selectedEndSample=Math.floor(endPct*audioBuffer.length);
     });
 
-    // Free drag for Text & Overlay
+    // Free drag
     previewCanvas.addEventListener('mousedown',e=>{
         const rect=previewCanvas.getBoundingClientRect();
         const x=(e.clientX-rect.left)*(previewCanvas.width/rect.width);
         const y=(e.clientY-rect.top)*(previewCanvas.height/rect.height);
 
-        // Check overlay first
         if(overlay.img){
             const sizePct=parseFloat(document.getElementById('overlaySize').value)/100;
             const ow=previewCanvas.width*sizePct;
@@ -862,8 +934,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                 return;
             }
         }
-
-        // Text
         if(textOverlays.length){
             selectedTextIdx=textOverlays.length-1;
             const t=textOverlays[selectedTextIdx];
@@ -872,12 +942,10 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             isDraggingText=true;
         }
     });
-
     window.addEventListener('mousemove',e=>{
         const rect=previewCanvas.getBoundingClientRect();
         const x=(e.clientX-rect.left)*(previewCanvas.width/rect.width);
         const y=(e.clientY-rect.top)*(previewCanvas.height/rect.height);
-
         if(isDraggingOverlay){
             overlay.x=Math.max(0.05,Math.min(0.95,(x-dragOffset.x)/previewCanvas.width));
             overlay.y=Math.max(0.05,Math.min(0.95,(y-dragOffset.y)/previewCanvas.height));
