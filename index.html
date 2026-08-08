@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>AI Studio Pro · Fast Export</title>
+<title>AI Studio Pro · Complete</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f6;padding:12px;min-height:100vh}
-.container{max-width:1340px;margin:0 auto;background:#0d121b;border-radius:18px;padding:16px;border:1px solid #1c2536}
+.container{max-width:1360px;margin:0 auto;background:#0d121b;border-radius:18px;padding:16px;border:1px solid #1c2536}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .header h1{font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:8px}
 .header h1 i{color:#60a5fa}
@@ -25,8 +25,8 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
 .status-text{font-size:0.7rem;color:#94a3b8;margin-left:auto;padding:3px 10px;background:#0f172a;border-radius:12px}
 .rec-timer{background:#ef4444;color:#fff;padding:3px 9px;border-radius:11px;font-size:0.72rem;font-weight:700;display:none}
 .rec-timer.active{display:inline-block}
-.main-grid{display:grid;grid-template-columns:1fr 290px;gap:12px}
-@media(max-width:960px){.main-grid{grid-template-columns:1fr}}
+.main-grid{display:grid;grid-template-columns:1fr 300px;gap:12px}
+@media(max-width:980px){.main-grid{grid-template-columns:1fr}}
 .preview-panel{background:#0f172a;border-radius:14px;border:1px solid #1e293b;overflow:hidden}
 .preview-header{padding:7px 12px;background:#1e293b;display:flex;justify-content:space-between;font-size:0.72rem;color:#94a3b8}
 #previewCanvas{width:100%;background:#000;display:block;cursor:grab}
@@ -38,35 +38,37 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
 .panel h3{font-size:0.78rem;color:#fbbf24;margin-bottom:7px;display:flex;align-items:center;gap:6px}
 .panel label{font-size:0.66rem;color:#94a3b8;display:block;margin-bottom:3px}
 .panel input[type=text],.panel select,.panel textarea,.panel input[type=number]{width:100%;background:#0f172a;border:1px solid #2a364d;color:#e2e8f0;padding:6px 8px;border-radius:7px;font-size:0.74rem;margin-bottom:5px}
-.panel textarea{min-height:44px;resize:vertical}
+.panel textarea{min-height:42px;resize:vertical}
 .btn-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
 .btn-row button{background:#2a364d;border:1px solid #3b4b66;color:#dbe4f3;padding:5px 9px;border-radius:7px;font-size:0.7rem;cursor:pointer}
 .btn-row button.primary{background:#3b82f6;border-color:#3b82f6;color:#fff}
 .btn-row button.success{background:#10b981;border-color:#10b981;color:#fff}
 .btn-row button.danger{background:#ef4444;border-color:#ef4444;color:#fff}
-.image-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;max-height:85px;overflow-y:auto}
+.image-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;max-height:80px;overflow-y:auto}
 .thumb-wrap{position:relative}
-.image-thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;border:2px solid #3b4b66}
+.image-thumb{width:42px;height:42px;border-radius:6px;object-fit:cover;border:2px solid #3b4b66}
 .thumb-del{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;width:15px;height:15px;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .wave-area{background:#0f172a;border-radius:13px;padding:9px;border:1px solid #1e293b;margin-top:9px}
-#wave-container{width:100%;height:78px;background:#020617;border-radius:9px;position:relative;overflow:hidden;cursor:crosshair}
+#wave-container{width:100%;height:80px;background:#020617;border-radius:9px;position:relative;overflow:hidden;cursor:crosshair}
 #waveCanvas{display:block;width:100%;height:100%}
 .playhead{position:absolute;top:0;left:0;width:2px;height:100%;background:#fbbf24;box-shadow:0 0 7px #fbbf24aa;z-index:5;pointer-events:none}
-.selection-region{position:absolute;top:0;height:100%;background:rgba(239,68,68,0.25);border:1px solid #ef4444;z-index:4;display:none;pointer-events:none}
+.selection-region{position:absolute;top:0;height:100%;background:rgba(239,68,68,0.28);border:1px solid #ef4444;z-index:4;display:none;pointer-events:none}
+.selection-time{font-size:0.72rem;color:#fbbf24;margin-top:5px;padding:4px 8px;background:#1e293b;border-radius:8px;display:none}
+.selection-time.active{display:block}
 .transport{display:flex;gap:7px;align-items:center;margin-top:5px;flex-wrap:wrap}
 .transport button{background:transparent;border:none;color:#cbd5e1;font-size:0.95rem;padding:3px 6px;cursor:pointer}
 .transport .play-btn{background:#3b82f6;color:#fff;padding:5px 13px;font-size:0.8rem;border-radius:20px;font-weight:700}
 #timeDisplay{font-size:0.72rem;color:#94a3b8}
 .controls{display:flex;flex-wrap:wrap;gap:7px 11px;background:#172033;padding:6px 11px;border-radius:20px;margin-top:5px;border:1px solid #2a364d;align-items:center}
 .controls label{font-size:0.63rem;color:#94a3b8;display:flex;align-items:center;gap:4px}
-.controls input[type=range]{width:50px;height:3px;background:#2a364d;border-radius:5px;-webkit-appearance:none}
+.controls input[type=range]{width:48px;height:3px;background:#2a364d;border-radius:5px;-webkit-appearance:none}
 .controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:#fbbf24;border-radius:50%;cursor:pointer}
-.controls .val{min-width:15px;color:#fbbf24;font-weight:600;font-size:0.64rem}
+.controls .val{min-width:14px;color:#fbbf24;font-weight:600;font-size:0.63rem}
 .metrics-box{background:#172033;border-radius:9px;padding:7px 11px;margin-top:7px;border:1px solid #2a364d;display:none;grid-template-columns:repeat(4,1fr);gap:3px}
 .metrics-box.active{display:grid}
 .metrics-box .item{text-align:center}
 .metrics-box .item .label{font-size:0.52rem;color:#64748b;text-transform:uppercase}
-.metrics-box .item .value{font-size:0.85rem;font-weight:700;color:#fbbf24}
+.metrics-box .item .value{font-size:0.84rem;font-weight:700;color:#fbbf24}
 .metrics-box .item .value.green{color:#34d399}
 .metrics-box .item .value.red{color:#f87171}
 .info-bar{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px;color:#64748b;font-size:0.63rem}
@@ -85,7 +87,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
 
 <div class="container">
     <div class="header">
-        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Fast</span> <span class="badge badge-ai">AI</span></h1>
+        <h1><i class="fas fa-microphone-lines"></i> AI Studio Pro <span class="badge">Complete</span> <span class="badge badge-ai">AI</span></h1>
     </div>
 
     <div class="toolbar">
@@ -109,7 +111,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         <div>
             <div class="preview-panel">
                 <div class="preview-header">
-                    <span>Preview • Drag Overlay & Text</span>
+                    <span>Preview • Drag Text & Overlay</span>
                     <span id="previewRes">1280×720</span>
                 </div>
                 <canvas id="previewCanvas" width="1280" height="720"></canvas>
@@ -117,9 +119,9 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                     <button id="playPreviewBtn" class="primary"><i class="fas fa-play"></i> Cheza</button>
                     <button id="stopPreviewBtn"><i class="fas fa-stop"></i></button>
                     <select id="aspectSelect">
-                        <option value="16:9">16:9</option>
-                        <option value="9:16">9:16</option>
-                        <option value="1:1">1:1</option>
+                        <option value="16:9">16:9 YouTube</option>
+                        <option value="9:16">9:16 TikTok/Reels</option>
+                        <option value="1:1">1:1 Square</option>
                     </select>
                     <select id="resSelect">
                         <option value="1080">1080p</option>
@@ -135,11 +137,15 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                     <div id="playhead" class="playhead"></div>
                     <div id="selectionRegion" class="selection-region"></div>
                 </div>
+                <div class="selection-time" id="selectionTime">
+                    Sehemu: <span id="selStart">00:00</span> → <span id="selEnd">00:00</span> 
+                    (<span id="selDuration">0.0s</span>
+                </div>
                 <div class="transport">
                     <button id="playBtn" class="play-btn"><i class="fas fa-play"></i></button>
                     <button id="pauseBtn"><i class="fas fa-pause"></i></button>
                     <button id="deleteRegionBtn" style="background:#ef4444;color:#fff;border:none;padding:4px 11px;border-radius:13px;font-size:0.72rem;cursor:pointer">
-                        <i class="fas fa-trash"></i> Futa
+                        <i class="fas fa-trash"></i> Futa Sehemu
                     </button>
                     <span id="timeDisplay">00:00 / 00:00</span>
                 </div>
@@ -168,17 +174,26 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                     <button id="clearImagesBtn" class="danger">Futa</button>
                 </div>
                 <div class="image-list" id="imageList"></div>
-                <label style="margin-top:6px">Effect</label>
+                <label style="margin-top:6px">Image Effect</label>
                 <select id="imageEffect">
+                    <option value="none">None</option>
                     <option value="fade">Fade</option>
                     <option value="zoom">Zoom In</option>
                     <option value="zoomout">Zoom Out</option>
                     <option value="kenburns">Ken Burns</option>
                     <option value="slide">Slide Left</option>
                     <option value="slideright">Slide Right</option>
+                    <option value="slideup">Slide Up</option>
+                    <option value="slidedown">Slide Down</option>
                     <option value="rotate">Rotate</option>
                     <option value="pulse">Pulse</option>
+                    <option value="bounce">Bounce</option>
+                    <option value="shake">Shake</option>
+                    <option value="blur">Blur In</option>
                     <option value="vibrant">Vibrant</option>
+                    <option value="dark">Darken</option>
+                    <option value="bright">Brighten</option>
+                    <option value="glitch">Glitch</option>
                 </select>
                 <label style="margin-top:6px">Overlay Size</label>
                 <input type="range" id="overlaySize" min="15" max="55" value="28" style="width:100%">
@@ -192,6 +207,8 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                         <option value="Arial Black">Arial Black</option>
                         <option value="Impact">Impact</option>
                         <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Courier New">Courier</option>
                     </select>
                     <input type="number" id="textSize" value="54" min="18" max="160" style="width:55px">
                 </div>
@@ -201,6 +218,23 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                 </div>
                 <label><input type="checkbox" id="textBold" checked> Bold</label>
                 <label><input type="checkbox" id="textBgEnable"> Background</label>
+                <label style="margin-top:5px">Text Animation</label>
+                <select id="textAnimation">
+                    <option value="none">None</option>
+                    <option value="pop">Pop In</option>
+                    <option value="fade">Fade In</option>
+                    <option value="slideup">Slide Up</option>
+                    <option value="slidedown">Slide Down</option>
+                    <option value="bounce">Bounce</option>
+                    <option value="zoom">Zoom</option>
+                    <option value="typewriter">Typewriter</option>
+                    <option value="glow">Glow</option>
+                    <option value="shake">Shake</option>
+                    <option value="wave">Wave</option>
+                    <option value="flip">Flip</option>
+                    <option value="rotate">Rotate In</option>
+                    <option value="elastic">Elastic</option>
+                </select>
                 <div class="btn-row">
                     <button id="addTextBtn" class="primary">Ongeza</button>
                     <button id="clearTextBtn" class="danger">Futa</button>
@@ -208,7 +242,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             </div>
 
             <div class="panel">
-                <h3><i class="fas fa-download"></i> Pakua (Haraka)</h3>
+                <h3><i class="fas fa-download"></i> Pakua</h3>
                 <div class="btn-row">
                     <button id="exportVideoBtn" class="success"><i class="fas fa-video"></i> Video</button>
                     <button id="exportWavBtn"><i class="fas fa-file-audio"></i> WAV</button>
@@ -218,8 +252,8 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     </div>
 
     <div class="info-bar">
-        <span>Rekodi → Ondoa Silence → Boost → Ongeza Picha → Pakua</span>
-        <span>Drag Overlay & Text free</span>
+        <span>Buruta kwenye waveform kuchagua sehemu → ona muda → Futa</span>
+        <span>Drag Text & Overlay free</span>
     </div>
 </div>
 
@@ -232,6 +266,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     const container = document.getElementById('wave-container');
     const playhead = document.getElementById('playhead');
     const selectionRegion = document.getElementById('selectionRegion');
+    const selectionTime = document.getElementById('selectionTime');
 
     let audioCtx = null;
     let originalBuffer = null;
@@ -267,6 +302,12 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     function initAudio(){
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         return audioCtx;
+    }
+
+    function formatTime(t){
+        const m = Math.floor(t/60);
+        const s = Math.floor(t%60);
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
     // Silence Removal
@@ -410,8 +451,24 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
 
     function clearSelection(){
         selectionRegion.style.display='none';
+        selectionTime.classList.remove('active');
         selectedStartSample=0;
         selectedEndSample=0;
+    }
+
+    function updateSelectionTime(){
+        if(!audioBuffer || selectedEndSample <= selectedStartSample){
+            selectionTime.classList.remove('active');
+            return;
+        }
+        const rate = audioBuffer.sampleRate;
+        const startSec = selectedStartSample / rate;
+        const endSec = selectedEndSample / rate;
+        const dur = endSec - startSec;
+        document.getElementById('selStart').textContent = formatTime(startSec);
+        document.getElementById('selEnd').textContent = formatTime(endSec);
+        document.getElementById('selDuration').textContent = dur.toFixed(2) + 's';
+        selectionTime.classList.add('active');
     }
 
     function loadAudio(buffer, storeOriginal=true){
@@ -491,10 +548,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     function updateTimeDisplay(){
         const dur=audioBuffer?audioBuffer.duration:0;
         document.getElementById('timeDisplay').textContent=`${formatTime(Math.min(currentTime,dur))} / ${formatTime(dur)}`;
-    }
-    function formatTime(t){
-        const m=Math.floor(t/60),s=Math.floor(t%60);
-        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
     // Recording
@@ -593,6 +646,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             bg:document.getElementById('textBg').value,
             bgEnable:document.getElementById('textBgEnable').checked,
             bold:document.getElementById('textBold').checked,
+            animation: document.getElementById('textAnimation').value,
             x:previewCanvas.width/2,
             y:previewCanvas.height*0.78,
             scale:1,
@@ -621,6 +675,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         pctx.fillStyle = '#000';
         pctx.fillRect(0, 0, w, h);
 
+        // Background images
         if(images.length > 0){
             const duration = audioBuffer ? audioBuffer.duration : 8;
             const idx = Math.min(images.length-1, Math.floor((time / duration) * images.length));
@@ -646,20 +701,38 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
                     pctx.translate(w/2 + (localTime-0.5)*40, h/2);
                     pctx.scale(z,z); pctx.translate(-w/2,-h/2);
                 } else if(effect === 'slide'){
-                    ix -= localTime * 80;
+                    ix -= localTime * 90;
                 } else if(effect === 'slideright'){
-                    ix += localTime * 80;
+                    ix += localTime * 90;
+                } else if(effect === 'slideup'){
+                    iy -= localTime * 70;
+                } else if(effect === 'slidedown'){
+                    iy += localTime * 70;
                 } else if(effect === 'rotate'){
                     pctx.translate(w/2,h/2);
-                    pctx.rotate(localTime * 0.12);
+                    pctx.rotate(localTime * 0.15);
                     pctx.translate(-w/2,-h/2);
                 } else if(effect === 'pulse'){
-                    const z = 1 + Math.sin(localTime * Math.PI * 2) * 0.04;
+                    const z = 1 + Math.sin(localTime * Math.PI * 2) * 0.05;
                     pctx.translate(w/2,h/2); pctx.scale(z,z); pctx.translate(-w/2,-h/2);
+                } else if(effect === 'bounce'){
+                    const z = 1 + Math.abs(Math.sin(localTime * Math.PI * 3)) * 0.08;
+                    pctx.translate(w/2,h/2); pctx.scale(z,z); pctx.translate(-w/2,-h/2);
+                } else if(effect === 'shake'){
+                    ix += Math.sin(localTime * 40) * 8;
+                } else if(effect === 'blur'){
+                    pctx.filter = `blur(${(1-localTime)*6}px)`;
                 } else if(effect === 'vibrant'){
-                    pctx.filter = 'contrast(1.13) saturate(1.3) brightness(1.05)';
+                    pctx.filter = 'contrast(1.15) saturate(1.35) brightness(1.06)';
+                } else if(effect === 'dark'){
+                    pctx.filter = 'brightness(0.7)';
+                } else if(effect === 'bright'){
+                    pctx.filter = 'brightness(1.25)';
+                } else if(effect === 'glitch'){
+                    ix += (Math.random()-0.5) * 12;
+                    pctx.filter = 'hue-rotate(90deg)';
                 }
-                if(effect === 'fade') pctx.globalAlpha = 0.3 + localTime * 0.7;
+                if(effect === 'fade') pctx.globalAlpha = 0.25 + localTime * 0.75;
 
                 pctx.drawImage(imgObj, ix, iy, iw, ih);
                 pctx.restore();
@@ -668,6 +741,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             }
         }
 
+        // Overlay
         if(overlay.img && overlay.img.complete){
             const sizePct = parseFloat(document.getElementById('overlaySize').value)/100;
             const ow = w * sizePct;
@@ -677,24 +751,62 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             pctx.drawImage(overlay.img, ox, oy, ow, oh);
         }
 
-        textOverlays.forEach(t=>{
+        // Text with animations
+        textOverlays.forEach((t, i)=>{
             pctx.save();
-            pctx.translate(t.x, t.y);
-            pctx.rotate(t.rotation || 0);
-            pctx.scale(t.scale, t.scale);
+            let scale = t.scale;
+            let alpha = 1;
+            let yOffset = 0;
+            let rot = t.rotation || 0;
+            const anim = t.animation || 'none';
+            const localT = (time % 2.5) / 2.5;
+
+            if(anim === 'pop'){
+                scale *= 0.6 + Math.min(localT * 2.5, 1) * 0.4;
+            } else if(anim === 'fade'){
+                alpha = Math.min(localT * 2, 1);
+            } else if(anim === 'slideup'){
+                yOffset = (1 - Math.min(localT * 2, 1)) * 40;
+            } else if(anim === 'slidedown'){
+                yOffset = -(1 - Math.min(localT * 2, 1)) * 40;
+            } else if(anim === 'bounce'){
+                scale *= 1 + Math.sin(localT * Math.PI * 4) * 0.08;
+            } else if(anim === 'zoom'){
+                scale *= 0.7 + Math.min(localT * 1.8, 1) * 0.3;
+            } else if(anim === 'glow'){
+                pctx.shadowColor = t.color;
+                pctx.shadowBlur = 15 + Math.sin(localT * Math.PI * 2) * 10;
+            } else if(anim === 'shake'){
+                yOffset = Math.sin(localT * 30) * 4;
+            } else if(anim === 'wave'){
+                yOffset = Math.sin(localT * Math.PI * 2) * 6;
+            } else if(anim === 'flip'){
+                scale *= Math.cos(localT * Math.PI);
+            } else if(anim === 'rotate'){
+                rot += localT * 0.4;
+            } else if(anim === 'elastic'){
+                scale *= 1 + Math.sin(localT * Math.PI * 3) * 0.12;
+            }
+
+            pctx.globalAlpha = alpha;
+            pctx.translate(t.x, t.y + yOffset);
+            pctx.rotate(rot);
+            pctx.scale(scale, Math.abs(scale));
             const weight = t.bold ? 'bold' : 'normal';
             pctx.font = `${weight} ${t.size}px ${t.font}`;
             pctx.textAlign = 'center';
             pctx.textBaseline = 'middle';
+
             if(t.bgEnable){
                 const m = pctx.measureText(t.text);
                 pctx.fillStyle = t.bg;
-                pctx.globalAlpha = 0.72;
+                pctx.globalAlpha = 0.7 * alpha;
                 pctx.fillRect(-m.width/2-12, -t.size/2-8, m.width+24, t.size+16);
-                pctx.globalAlpha = 1;
+                pctx.globalAlpha = alpha;
             }
-            pctx.shadowColor = 'rgba(0,0,0,0.65)';
-            pctx.shadowBlur = 6;
+
+            pctx.shadowColor = 'rgba(0,0,0,0.6)';
+            pctx.shadowBlur = 5;
             pctx.shadowOffsetX = 1;
             pctx.shadowOffsetY = 2;
             pctx.fillStyle = t.color;
@@ -724,7 +836,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         stopPlayback();
     }
 
-    // ================== FAST VIDEO EXPORT ==================
+    // Fast Export
     async function exportVideo(){
         if(!audioBuffer && !images.length) return alert('Hakuna content');
         updateCanvasSize();
@@ -737,7 +849,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         document.getElementById('exportVideoBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         drawPreviewFrame(0);
-
         const canvasStream = previewCanvas.captureStream(fps);
         let combined = canvasStream;
         let audioSource = null;
@@ -774,7 +885,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         };
 
         recorder.start(40);
-
         let frame = 0;
         function renderNextFrame(){
             if(frame > totalFrames){
@@ -792,7 +902,6 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
             if(frame % 4 === 0) setTimeout(renderNextFrame, 0);
             else requestAnimationFrame(renderNextFrame);
         }
-
         if(audioBuffer && audioSource) audioSource.start(0);
         renderNextFrame();
     }
@@ -878,7 +987,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
     document.getElementById('aspectSelect').onchange=updateCanvasSize;
     document.getElementById('resSelect').onchange=updateCanvasSize;
 
-    // Waveform selection
+    // Waveform selection + Time display
     container.addEventListener('mousedown',e=>{
         if(!audioBuffer) return;
         const rect=container.getBoundingClientRect();
@@ -906,6 +1015,7 @@ body{background:#070a10;font-family:'Segoe UI',system-ui,sans-serif;color:#eef2f
         if(endPct-startPct<0.004){clearSelection();return}
         selectedStartSample=Math.floor(startPct*audioBuffer.length);
         selectedEndSample=Math.floor(endPct*audioBuffer.length);
+        updateSelectionTime();
     });
 
     // Free drag
